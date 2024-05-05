@@ -5,14 +5,15 @@
     Create UBUNTU v 20.x vm on azure
     name: fredlinuxg
     username: fredericaltorres
-    save the file fredlinuxe_key.pem
+    save the file fredlinuxg_key.pem
     copy "*.pem" "C:\Users\ftorres\.ssh"
 
 ## ssh connection to vm
     find the ip
     open a powershell console on windows
-    $vmip = "20.46.242.76"
-    ssh.exe -i ~/.ssh/fredlinuxf_key.pem "fredericaltorres@$( $vmip )"
+    $vmip = "20.106.62.93"
+    $vmletter = "g"
+    ssh.exe -i ~/.ssh/fredlinux$( $vmletter )_key.pem "fredericaltorres@$( $vmip )"
 
 # Nginx installation
 
