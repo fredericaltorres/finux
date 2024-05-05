@@ -3,24 +3,29 @@
 # Steps
 ## VM CREATION
     Create UBUNTU v 20.x vm on azure
-    name: fredlinuxe
+    name: fredlinuxf
     username: fredericaltorres
     save the file fredlinuxe_key.pem
-    copy "./fredlinuxe_key.pem" "C:\Users\ftorres\.ssh"
+    copy "./fredlinuxf_key.pem" "C:\Users\ftorres\.ssh"
 
 ## ssh connection to vm
     find the ip
     open a powershell console on windows
-    $vmip = "20.106.62.178"
-    ssh.exe -i ~/.ssh/fredlinuxe_key.pem "fredericaltorres@$( $vmip )"
+    $vmip = "20.46.242.76"
+    ssh.exe -i ~/.ssh/fredlinuxf_key.pem "fredericaltorres@$( $vmip )"
 
 # Nginx installation
 
 sudo apt update
 sudo apt install python3-pip -y
 sudo apt install nginx
+
+sudo apt install libnginx-mod-rtmp
+sudo apt-get clean ; sudo apt-get update ; sudo apt-get check ; sudo apt-get purge ffmpeg* -y ; sudo apt-get autoremove -y ; sudo apt-get -f satisfy ffmpeg -y
+### https://forum.linuxconfig.org/t/ffmpeg-solve-unmet-dependencies/5356
+
 sudo nginx -v
-    
+
 ## firewall:
     sudo ufw status
     sudo ufw app list
@@ -47,14 +52,31 @@ sudo apt install libnginx-mod-rtmp
 
 # Nginx configuration
 
-use file sites-available.rtmp and create file /etc/nginx/sites-available/rtmp
-use file sites-available.rtmp and create file /etc/nginx/sites-available/rtmp
+cd /etc/nginx/sites-available
+sudo curl --output rtmp https://raw.githubusercontent.com/fredericaltorres/finux/main/nginx/streaming.configuration/sites-available.rtmp
+
+cd /etc/nginx/sites-enabled
+sudo curl --output rtmp https://raw.githubusercontent.com/fredericaltorres/finux/main/nginx/streaming.configuration/sites-available.rtmp
+
+cd /etc/nginx
+sudo curl --output  nginx.conf https://raw.githubusercontent.com/fredericaltorres/finux/main/nginx/streaming.configuration/nginx.with-rtmp.conf
+
 use file nginx.with-rtmp.conf and paste it into
     sudo nano /etc/nginx/nginx.conf
 
-test: sudo nginx -t
-restart: sudo nginx -s reload
-test: sudo systemctl status nginx
+test:
+    sudo nginx -t
+restart: 
+    sudo nginx -s reload
+test: 
+sudo systemctl status nginx
+
+# test python end point
+cd /home
+sudo curl --output start_app_servers.py https://raw.githubusercontent.com/fredericaltorres/finux/main/nginx/streaming.configuration/start_app_servers.py
+
+python3 /home/start_app_servers.py
+
 
 
 # vm configuration info
