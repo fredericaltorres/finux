@@ -3,10 +3,10 @@
 # Steps
 ## VM CREATION
     Create UBUNTU v 20.x vm on azure
-    name: fredlinuxf
+    name: fredlinuxg
     username: fredericaltorres
     save the file fredlinuxe_key.pem
-    copy "./fredlinuxf_key.pem" "C:\Users\ftorres\.ssh"
+    copy "*.pem" "C:\Users\ftorres\.ssh"
 
 ## ssh connection to vm
     find the ip
@@ -19,7 +19,6 @@
 sudo apt update
 sudo apt install python3-pip -y
 sudo apt install nginx
-
 sudo apt install libnginx-mod-rtmp
 sudo apt-get clean ; sudo apt-get update ; sudo apt-get check ; sudo apt-get purge ffmpeg* -y ; sudo apt-get autoremove -y ; sudo apt-get -f satisfy ffmpeg -y
 ### https://forum.linuxconfig.org/t/ffmpeg-solve-unmet-dependencies/5356
