@@ -74,7 +74,12 @@ test:
 sudo systemctl status nginx
 
 # testing static page
+
 sudo mkdir /var/www/fred_static_page
+sudo curl --output index.html https://raw.githubusercontent.com/fredericaltorres/finux/main/nginx/streaming.configuration/index.html
+
+cd /etc/nginx/conf.d
+sudo curl --output fred_static_page.conf https://raw.githubusercontent.com/fredericaltorres/finux/main/nginx/streaming.configuration/fred_static_page.conf
 
 # test python end point
 cd /home
