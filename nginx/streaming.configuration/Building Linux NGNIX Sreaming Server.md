@@ -61,7 +61,7 @@ sudo rm default
 sudo curl --output rtmp https://raw.githubusercontent.com/fredericaltorres/finux/main/nginx/streaming.configuration/sites-available.rtmp
 
 cd /etc/nginx
-sudo curl --output  nginx.conf https://raw.githubusercontent.com/fredericaltorres/finux/main/nginx/streaming.configuration/nginx.with-rtmp.conf
+sudo curl --output nginx.conf https://raw.githubusercontent.com/fredericaltorres/finux/main/nginx/streaming.configuration/nginx.with-rtmp.conf
 
 use file nginx.with-rtmp.conf and paste it into
     sudo nano /etc/nginx/nginx.conf
@@ -76,6 +76,7 @@ sudo systemctl status nginx
 # testing static page
 
 sudo mkdir /var/www/fred_static_page
+cd /var/www/fred_static_page
 sudo curl --output index.html https://raw.githubusercontent.com/fredericaltorres/finux/main/nginx/streaming.configuration/index.html
 
 cd /etc/nginx/conf.d

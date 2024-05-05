@@ -7,6 +7,10 @@
 pause() {
     echo "Press Enter to continue..."; read;
 }
+restart_nginx() {
+    sudo nginx -t
+    sudo nginx -s reload
+}
 
 echo "Installing nginx, pythoh3, ffmpeg and rtmp modules..."
 pause
@@ -61,9 +65,7 @@ cd /home/videos
 
 echo "re start nginx"
 pause
-sudo nginx -t
-sudo nginx -s reload
-
+restart_nginx
 
 echo "INSTALLATION COMPLETED!"
 pause
