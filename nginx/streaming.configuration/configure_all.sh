@@ -39,4 +39,10 @@ sudo curl --output fred_static_page.conf https://raw.githubusercontent.com/frede
 
 
 
+echo "Install python script to start app servers"
+cd /home
+sudo curl --output start_app_servers.py https://raw.githubusercontent.com/fredericaltorres/finux/main/nginx/streaming.configuration/start_app_servers.py
+#  sudo python3 /home/start_app_servers.py
+
+
 restart_nginx
