@@ -53,9 +53,11 @@ sudo apt install libnginx-mod-rtmp
 # Nginx configuration
 
 cd /etc/nginx/sites-available
+sudo rm default
 sudo curl --output rtmp https://raw.githubusercontent.com/fredericaltorres/finux/main/nginx/streaming.configuration/sites-available.rtmp
 
 cd /etc/nginx/sites-enabled
+sudo rm default
 sudo curl --output rtmp https://raw.githubusercontent.com/fredericaltorres/finux/main/nginx/streaming.configuration/sites-available.rtmp
 
 cd /etc/nginx
@@ -71,11 +73,16 @@ restart:
 test: 
 sudo systemctl status nginx
 
+# testing static page
+sudo mkdir /var/www/fred_static_page
+
 # test python end point
 cd /home
 sudo curl --output start_app_servers.py https://raw.githubusercontent.com/fredericaltorres/finux/main/nginx/streaming.configuration/start_app_servers.py
 
-python3 /home/start_app_servers.py
+sudo python3 /home/start_app_servers.py
+
+sudo curl --output binaryville.conf https://raw.githubusercontent.com/fredericaltorres/finux/main/nginx/streaming.configuration/binaryville.conf
 
 
 
