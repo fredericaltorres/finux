@@ -38,6 +38,8 @@ curl --output convert_video.sh https://raw.githubusercontent.com/fredericaltorre
 
 chmod +x convert_video.sh
 
+./convert_video.sh
+
 # Nginx installation
 
 sudo apt update
