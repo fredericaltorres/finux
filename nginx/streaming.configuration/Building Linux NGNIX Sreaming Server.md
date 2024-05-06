@@ -15,6 +15,8 @@
     $vmletter = "g"
     ssh.exe -i ~/.ssh/fredlinux$( $vmletter )_key.pem "fredericaltorres@$( $vmip )"
 
+    az vm user reset-ssh --resource-group NGINX-Plus-HA --name fredlinuxg
+
 # Nginx installation
 
 sudo apt update
