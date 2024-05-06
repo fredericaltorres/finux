@@ -17,26 +17,20 @@ pause
 
 echo "OS update"
 sudo apt update
-pause
 
 sudo apt-get upgrade cloud-init
-pause
 
 echo "Python3 installation"
 sudo apt install python3-pip -y
-pause
 
 echo "Nginx installation"
 sudo apt install nginx
-pause
 
 echo "rtmp module installation"
 sudo apt install libnginx-mod-rtmp
-pause
 
 echo "ffmpeg installation"
 sudo apt-get clean ; sudo apt-get update ; sudo apt-get check ; sudo apt-get purge ffmpeg* -y ; sudo apt-get autoremove -y ; sudo apt-get -f satisfy ffmpeg -y
-pause
 
 echo "Firewall configuration"
 sudo ufw app list

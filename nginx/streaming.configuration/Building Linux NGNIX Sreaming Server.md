@@ -3,7 +3,7 @@
 # Steps
 ## VM CREATION
     Create UBUNTU v 20.x vm on azure
-    name: fredlinuxg
+    name: fredlinuxh
     username: fredericaltorres
     save the file fredlinuxg_key.pem
     copy "*.pem" "C:\Users\ftorres\.ssh"
@@ -11,11 +11,32 @@
 ## ssh connection to vm
     find the ip
     open a powershell console on windows
-    $vmip = "20.106.62.93"
-    $vmletter = "g"
+    $vmip = "20.80.104.238"
+    $vmletter = "h"
     ssh.exe -i ~/.ssh/fredlinux$( $vmletter )_key.pem "fredericaltorres@$( $vmip )"
 
     az vm user reset-ssh --resource-group NGINX-Plus-HA --name fredlinuxg
+
+
+curl --output install_all.sh https://raw.githubusercontent.com/fredericaltorres/finux/main/nginx/streaming.configuration/install_all.sh
+
+chmod +x install_all.sh
+./install_all.sh
+
+
+
+curl --output configure_all.sh https://raw.githubusercontent.com/fredericaltorres/finux/main/nginx/streaming.configuration/configure_all.sh
+
+chmod +x configure_all.sh
+./configure_all.sh
+
+sudo ufw status
+sudo systemctl status nginx
+
+
+curl --output convert_video.sh https://raw.githubusercontent.com/fredericaltorres/finux/main/nginx/streaming.configuration/convert_video.sh
+
+chmod +x convert_video.sh
 
 # Nginx installation
 

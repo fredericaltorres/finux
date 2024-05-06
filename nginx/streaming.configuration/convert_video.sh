@@ -43,5 +43,5 @@ echo "Convert to hls fredffmpeg video conversion in multiple resolution"
 ToHls "$fredband_video_url" "fredbandband" # use a url
 pause
 
-http://20.106.62.93:8088/hls/fredbandband/fredbandband-0.m3u8
-http://20.106.62.93:8088/hls/fredbandband/master.m3u8
+# http://20.106.62.93:8088/hls/fredbandband/fredbandband-0.m3u8
+# http://20.106.62.93:8088/hls/fredbandband/master.m3u8
