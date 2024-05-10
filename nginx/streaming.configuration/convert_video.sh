@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 # sudo chmod +x configure_all.sh
@@ -42,6 +43,21 @@ echo "Convert to hls fredffmpeg video conversion in multiple resolution"
 # ToHls "/home/videos/fredband.mp4" "fredbandband" # use a local file
 ToHls "$fredband_video_url" "fredbandband" # use a url
 pause
+ 
+http://74.249.130.23:8088/hls/fredbandband/master.m3u8
+http://74.249.130.23:8088/hls/fredbandband/fredbandband-0.m3u8
+http://74.249.130.23:8088/hls/fredbandband/fredbandband-0/data01.ts
 
-# http://20.106.62.93:8088/hls/fredbandband/fredbandband-0.m3u8
-# http://20.106.62.93:8088/hls/fredbandband/master.m3u8
+https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/master.m3u8
+https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/fredbandband-0.m3u8
+
+
+
+# lb 20.33.73.31 
+
+http://20.33.73.31:8088/hls/fredbandband/master.m3u8
+http://20.33.73.31:8088/hls/fredbandband/fredbandband-0.m3u8
+
+
+http://20.33.73.31:443/hls/fredbandband/master.m3u8
+https://20.33.73.31/hls/fredbandband/master.m3u8
