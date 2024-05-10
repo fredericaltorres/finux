@@ -208,12 +208,11 @@ https://github.com/Azure/api-management-policy-snippets/tree/master/examples
     return $"http://{newHost}{context.Request.Path}";
 }" />
 
+curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/master.m3u8
+curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/fredbandband-0.m3u8
+
 http://74.249.130.23:8088/hls/fredbandband/master.m3u8
-
-curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/passthru?u=/hls/fredbandband/master.m3u8
-curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/passthru?u=/hls/fredbandband/fredbandband-0.m3u8
-curl.exe --output a.ts https://faiwebapiapimanagementservices.azure-api.net/video/passthru?u=/hls/fredbandband/fredbandband-0/data00.ts
-
+http://74.249.130.23:8088/hls/fredbandband/fredbandband-0.m3u8
 
 # Gateways
 
