@@ -6,7 +6,10 @@
         https://www.nginx.com/blog/video-streaming-for-remote-learning-with-nginx
 
     Using NGINX Plus for Advanced Video Streaming (https://www.youtube.com/watch?v=xbFBjvUT-k0)
-    
+
+# nodejs
+https://dev.to/indranilchutia/how-to-implement-hls-video-streaming-in-a-react-app-2cki    
+
 # Steps
 ## VM CREATION
     Create UBUNTU v 20.x vm on azure
@@ -191,69 +194,10 @@ From windows using vlc open in network http://20.106.62.178:8088/hls/fredband_0.
 ffmpeg -i "/home/videos/fredband.mp4" -filter_complex "[0:v]split=3[v1][v2][v3]; [v1]copy[v1out]; [v2]scale=w=1280:h=720[v2out]; [v3]scale=w=640:h=360[v3out]" -map "[v1out]" -c:v:0 libx264 -x264-params "nal-hrd=cbr:force-cfr=1" -b:v:0 5M -maxrate:v:0 5M -minrate:v:0 5M -bufsize:v:0 10M -preset slow -g 48 -sc_threshold 0 -keyint_min 48 -map "[v2out]" -c:v:1 libx264 -x264-params "nal-hrd=cbr:force-cfr=1" -b:v:1 3M -maxrate:v:1 3M -minrate:v:1 3M -bufsize:v:1 3M -preset slow -g 48 -sc_threshold 0 -keyint_min 48 -map "[v3out]" -c:v:2 libx264 -x264-params "nal-hrd=cbr:force-cfr=1" -b:v:2 1M -maxrate:v:2 1M -minrate:v:2 1M -bufsize:v:2 1M -preset slow -g 48 -sc_threshold 0 -keyint_min 48 -map a:0 -c:a:0 aac -b:a:0 96k -ac 2 -map a:0 -c:a:1 aac -b:a:1 96k -ac 2 -map a:0 -c:a:2 aac -b:a:2 48k -ac 2 -f hls -hls_time 2 -hls_playlist_type vod -hls_flags independent_segments -hls_segment_type mpegts -hls_segment_filename fredband2_%v/data%02d.ts -master_pl_name master.m3u8 -var_stream_map "v:0,a:0 v:1,a:1 v:2,a:2" fredband2_%v.m3u8
 
 From windows using vlc open in network
-http://20.106.62.178:8088/hls/fredband2_0.m3u8
-http://20.106.62.178:8088/hls/fredband2_1.m3u8
-http://20.106.62.178:8088/hls/fredband2_2.m3u8
-
-fredband2_2/
-
-
 https://learn.microsoft.com/en-us/azure/api-management/api-management-policy-expressions
 https://github.com/Azure/api-management-policy-snippets/tree/master/examples
 
-<rewrite-uri id="rewrite-uri" template="@{
-    var originalHost = context.Request.OriginalUrl.Host;
-    var newHost = "newhostname.example.com";
-    return $"{context.Request.Scheme}://{newHost}{context.Request.Path}{context.Request.QueryString}";
-}" />
-
-<rewrite-uri id="rewrite-uri" template="@{
-    var newHost = "74.249.130.23:8088";
-    return $"http://{newHost}{context.Request.Path}";
-}" />
-
-<rewrite-uri id="rewrite-uri" template="@{
-    var url = context.Request.Url.Query.GetValueOrDefault("u");
-    return $"{url}";
-}" />
-
-<rewrite-uri id="rewrite-uri" template="@{
-    var subUrl = $"{context.Request.Url.Query}".Replace("/video", "");
-    return $"{subUrl}";
-}" />
 
 
-        <rewrite-uri id="rewrite-uri" template="@{
-
-        // query string mode
-        /*
-        var urlQuery = context.Request.Url.Query.GetValueOrDefault("u");
-        if(!string.IsNullOrEmpty(urlQuery)) {
-
-            return urlQuery;
-        }
-        */
-        // url mode
-        var subUrl = context.Request.Url.ToString().Replace("/video", "");
-        return $"{subUrl}";
-        // return "/hls/fredbandband/master.m3u8";            
-}" />
-
-<rewrite-uri template="http://74.249.130.23:8088/{path}" copy-unmatched-params="false" />   
-<set-variable name="originalPath" value="@(context.Request.Url.Path.ToLower().Replace("video/", ""))" />
-<set-uri>@(new Uri("http://new-host/" + context.Variables.GetValueOrDefault<string>("originalPath"))) </set-uri>        
-
-curl.exe http://74.249.130.23:8088/hls/fredbandband/master.m3u8
-curl.exe http://74.249.130.23:8088/hls/fredbandband/fredbandband-0.m3u8
-
-curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/master.m3u8
-curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/fredbandband-0.m3u8
-
-curl --output ts.ts http://74.249.130.23:8088/hls/fredbandband/fredbandband-0/data00.ts
-curl --output ts.ts https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/fredbandband-0/data00.ts
-
-https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/fredbandband-0.m3u8?YjTUB6vVEI7_rU7BWWgrhjoeZJkGAAnq82Rpk4_CCxQDVn0BuHTnJ5tKhYmZPKo9h3iaAQCUShod2LcDe6SkegxlLw
-https://bskrmsqauswest-uswe.azureedge.net/a62ec8c0-530f-4040-35b7-08dc70ea9dca/s1428817.ism/Manifest(format=m3u8-cmaf)?YjTUB6vVEI7_rU7BWWgrhjoeZJkGAAnq82Rpk4_CCxQDVn0BuHTnJ5tKhYmZPKo9h3iaAQCUShod2LcDe6SkegxlLw
-# Gateways
 
 What is Azure Application Gateway? | How to Deploy Application Gateway (https://www.youtube.com/watch?v=n9uHSHO25cE)
