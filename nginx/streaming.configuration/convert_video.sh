@@ -18,7 +18,8 @@ ToHls() {
 }
 
 ToHls1080p() {
-
+    local filename=$1
+    local idname=$2
     local medium = "medium"
 # Resolution #0 supplied is 1920x1080 1080p 5Mb/s
 # Resolution #1 960x540 1080p/2 3 Mb/s
@@ -33,7 +34,7 @@ ToHls1080p() {
     -hls_flags independent_segments -hls_segment_type mpegts \
     -hls_segment_filename "$idname-%v/data%02d.ts" \
     -master_pl_name "master.m3u8" \
-    -var_stream_map "v:0,a:0 v:1,a:1 v:2,a:2" "$idname-%v.m3u8" \    
+    -var_stream_map "v:0,a:0 v:1,a:1" "$idname-%v.m3u8"     
 }
 
 pause() {
@@ -63,8 +64,8 @@ echo "Convert to hls fredffmpeg video conversion in multiple resolution"
 ToHls1080p "$AndYourBirdCanSing_video_url" "AndYourBirdCanSing" # use a url
 pause
 
-ToHls "$fredband_video_url" "fredbandband" # use a url
-pause
+#ToHls "$fredband_video_url" "fredbandband" # use a url
+#pause
 
 # curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/master.m3u8
 # curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/fredbandband-0.m3u8
