@@ -15,6 +15,14 @@ restart_nginx() {
 echo "Installing nginx, pythoh3, ffmpeg and rtmp modules..."
 pause
 
+echo "Os Info"
+cat /etc/lsb-release
+pause
+
+echo "Drive Info"
+df -h
+pause
+
 echo "OS update"
 sudo apt update
 

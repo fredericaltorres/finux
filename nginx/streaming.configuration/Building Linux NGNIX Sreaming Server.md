@@ -1,5 +1,12 @@
 # Linux:UBUNTU v 20.xx + Ngnix + rtmp
 
+# video
+    Using NGINX Open Source for Video Streaming from ffmpeg+ rtmp and Storage (https://www.youtube.com/watch?v=Js1OlvRNsdI&t=9s)
+        rtmp is a protocol, like hls.
+        https://www.nginx.com/blog/video-streaming-for-remote-learning-with-nginx
+
+    Using NGINX Plus for Advanced Video Streaming (https://www.youtube.com/watch?v=xbFBjvUT-k0)
+    
 # Steps
 ## VM CREATION
     Create UBUNTU v 20.x vm on azure
@@ -7,14 +14,12 @@
     username: fredericaltorres
     save the file fredlinuxe_key.pem
     copy "*.pem" "C:\Users\ftorres\.ssh"
-
 ## ssh connection to vm
     find the ip
     open a powershell console on windows
     $vmip = "74.249.130.23"
     $vmletter = "e"
     ssh.exe -i ~/.ssh/fredlinux$( $vmletter )_key.pem "fredericaltorres@$( $vmip )"
-
     az vm user reset-ssh --resource-group NGINX-Plus-HA --name fredlinuxg
 
 curl --output install_all.sh https://raw.githubusercontent.com/fredericaltorres/finux/main/nginx/streaming.configuration/install_all.sh
@@ -202,18 +207,53 @@ https://github.com/Azure/api-management-policy-snippets/tree/master/examples
     return $"{context.Request.Scheme}://{newHost}{context.Request.Path}{context.Request.QueryString}";
 }" />
 
-
 <rewrite-uri id="rewrite-uri" template="@{
     var newHost = "74.249.130.23:8088";
     return $"http://{newHost}{context.Request.Path}";
 }" />
 
+<rewrite-uri id="rewrite-uri" template="@{
+    var url = context.Request.Url.Query.GetValueOrDefault("u");
+    return $"{url}";
+}" />
+
+<rewrite-uri id="rewrite-uri" template="@{
+    var subUrl = $"{context.Request.Url.Query}".Replace("/video", "");
+    return $"{subUrl}";
+}" />
+
+
+        <rewrite-uri id="rewrite-uri" template="@{
+
+        // query string mode
+        /*
+        var urlQuery = context.Request.Url.Query.GetValueOrDefault("u");
+        if(!string.IsNullOrEmpty(urlQuery)) {
+
+            return urlQuery;
+        }
+        */
+        // url mode
+        var subUrl = context.Request.Url.ToString().Replace("/video", "");
+        return $"{subUrl}";
+        // return "/hls/fredbandband/master.m3u8";            
+}" />
+
+<rewrite-uri template="http://74.249.130.23:8088/{path}" copy-unmatched-params="false" />   
+<set-variable name="originalPath" value="@(context.Request.Url.Path.ToLower().Replace("video/", ""))" />
+<set-uri>@(new Uri("http://new-host/" + context.Variables.GetValueOrDefault<string>("originalPath"))) </set-uri>        
+
+curl.exe http://74.249.130.23:8088/hls/fredbandband/master.m3u8
+curl.exe http://74.249.130.23:8088/hls/fredbandband/fredbandband-0.m3u8
+
 curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/master.m3u8
 curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/fredbandband-0.m3u8
 
-http://74.249.130.23:8088/hls/fredbandband/master.m3u8
-http://74.249.130.23:8088/hls/fredbandband/fredbandband-0.m3u8
+curl --output ts.ts http://74.249.130.23:8088/hls/fredbandband/fredbandband-0/data00.ts
+curl --output ts.ts https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/fredbandband-0/data00.ts
 
+https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/fredbandband-0.m3u8?YjTUB6vVEI7_rU7BWWgrhjoeZJkGAAnq82Rpk4_CCxQDVn0BuHTnJ5tKhYmZPKo9h3iaAQCUShod2LcDe6SkegxlLw
+https://bskrmsqauswest-uswe.azureedge.net/a62ec8c0-530f-4040-35b7-08dc70ea9dca/s1428817.ism/Manifest(format=m3u8-cmaf)?YjTUB6vVEI7_rU7BWWgrhjoeZJkGAAnq82Rpk4_CCxQDVn0BuHTnJ5tKhYmZPKo9h3iaAQCUShod2LcDe6SkegxlLw
 # Gateways
 
 What is Azure Application Gateway? | How to Deploy Application Gateway (https://www.youtube.com/watch?v=n9uHSHO25cE)
