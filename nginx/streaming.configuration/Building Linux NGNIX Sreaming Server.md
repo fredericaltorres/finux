@@ -7,6 +7,10 @@
 
     Using NGINX Plus for Advanced Video Streaming (https://www.youtube.com/watch?v=xbFBjvUT-k0)
 
+# ffmpeg fix
+- https://www.martin-riedl.de/2018/08/30/using-ffmpeg-as-a-hls-streaming-server-part-5-folder-structure/    
+- https://www.martin-riedl.de/2020/05/31/using-ffmpeg-as-a-hls-streaming-server-part-9-multiple-audio-languages/
+
 # nodejs
 https://dev.to/indranilchutia/how-to-implement-hls-video-streaming-in-a-react-app-2cki    
 
