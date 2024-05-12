@@ -26,6 +26,9 @@ https://strmsdemo.z13.web.core.windows.net?url=https://faiwebapiapimanagementser
 curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/master.m3u8
 curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/fredbandband-0.m3u8
 
+curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/AndYourBirdCanSing/master.m3u8
+curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/AndYourBirdCanSing/AndYourBirdCanSing-0.m3u8
+
 curl --output ts.ts http://74.249.130.23:8088/hls/fredbandband/fredbandband-0/data00.ts
 curl --output ts.ts https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/fredbandband-0/data00.ts
 
