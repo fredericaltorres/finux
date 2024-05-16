@@ -89,7 +89,7 @@ echo "Convert to hls fredffmpeg video conversion in multiple resolution"
 #ToHls1080p "$AndYourBirdCanSing_video_url" "AndYourBirdCanSing" # use a url
 #pause
 
-ToHls1080p "$fredband_video_url" "fredbandband" # use a url
+ToHls1080p "$fredband_video_url" "fredTrio" # use a url
 pause
 
 # curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/master.m3u8

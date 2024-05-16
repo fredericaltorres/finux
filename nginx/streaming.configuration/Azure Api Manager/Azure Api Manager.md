@@ -22,9 +22,13 @@ curl.exe http://74.249.130.23:8088/hls/fredbandband/fredbandband-0.m3u8
 
 ## Ravnur Player fredbandband
 https://strmsdemo.z13.web.core.windows.net?url=https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/master.m3u8
+https://strmsdemo.z13.web.core.windows.net?url=https://faiwebapiapimanagementservices.azure-api.net/video/hls/AndYourBirdCanSing/master.m3u8
 
 curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/master.m3u8
 curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/fredbandband-0.m3u8
+
+curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredTrio/master.m3u8
+curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredTrio/fredTrio-0.m3u8
 
 curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/AndYourBirdCanSing/master.m3u8
 curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/AndYourBirdCanSing/AndYourBirdCanSing-0.m3u8
