@@ -42,7 +42,7 @@ function ToHls1080p($filename, $idname) {
     -map a:0 -c:a:1 aac -b:a:1 128k -ac 2 `
     -f hls -hls_time 2 -hls_playlist_type vod `
     -hls_flags independent_segments -hls_segment_type mpegts `
-    -hls_segment_filename "$idname-%v/data%04d.ts" -use_localtime_mkdir 1 ` 
+    -hls_segment_filename "$idname-%v/data%04d.ts" -use_localtime_mkdir 1 `
     -master_pl_name "master.m3u8" `
     -var_stream_map "v:0,a:0 v:1,a:1" "$idname-%v.m3u8" `
 
@@ -83,8 +83,13 @@ $joe_video_url         = "https://fredcloud.blob.core.windows.net/public/BindenM
 $fredband_video_url    = "https://fredcloud.blob.core.windows.net/public/sirosVariri.05.Video.FULL.mp4?se=2025-04-18T04%3A58%3A52Z&sig=TfjW9%2FTU0F7uenwNaCzdg0l3VAAcbmP%2FN7yXel7k05I%3D&sp=r&sr=b&ss=2024-05-16T04%3A58%3A57Z&sv=2014-02-14"
 $AndYourBirdCanSing_video_url = "https://fredcloud.blob.core.windows.net/video/And%20Your%20Bird%20Can%20Sing.Video.mp4?se=2025-02-07T20%3A29%3A47Z&sig=krL4B2ICzz4MuIVnPsNsTmA9%2BC6RXkKIW5x0%2BJTp6aE%3D&sp=r&sr=b&ss=2024-05-11T19%3A29%3A52Z&sv=2014-02-14"
 
-ToHls1080p "$fredband_video_url" "fredTrio"
+#ToHls1080p "$fredband_video_url" "fredTrio"
+#pause
+# https://fvideostream.blob.core.windows.net/hls/fredTrio/master.m3u8
+
+ToHls1080p "$AndYourBirdCanSing_video_url" "AndYourBirdCanSing"
 pause
+# https://fvideostream.blob.core.windows.net/hls/AndYourBirdCanSing/master.m3u8
 
 # curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/master.m3u8
 # curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/fredbandband-0.m3u8
@@ -93,8 +98,9 @@ pause
 # # lb 20.33.73.31 
 # http://74.249.130.23:8088/hls/fredbandband/master.m3u8
 # http://74.249.130.23:8088/hls/fredbandband/fredbandband-0.m3u8
-
-
 # curl.exe https://faiwebapiapimanagementservices.azure-api.net/video/hls/fredbandband/master.m3u8
 
+# https://fredcloud.blob.core.windows.net/public/stream/hls/fredTrio/master.m3u8
 
+# Azure Blob Storage pricing
+# https://azure.microsoft.com/en-us/pricing/details/storage/blobs/?ef_id=_k_Cj0KCQjwgJyyBhCGARIsAK8LVLMDXJ_jJO5HCvw_1t1TGhPCk3__vgweROpmiv91moAhzMl2rAm3D7kaAlv5EALw_wcB_k_&OCID=AIDcmm5edswduu_SEM__k_Cj0KCQjwgJyyBhCGARIsAK8LVLMDXJ_jJO5HCvw_1t1TGhPCk3__vgweROpmiv91moAhzMl2rAm3D7kaAlv5EALw_wcB_k_&gad_source=1&gclid=Cj0KCQjwgJyyBhCGARIsAK8LVLMDXJ_jJO5HCvw_1t1TGhPCk3__vgweROpmiv91moAhzMl2rAm3D7kaAlv5EALw_wcB
