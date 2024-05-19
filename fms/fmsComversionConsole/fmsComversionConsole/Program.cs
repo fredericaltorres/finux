@@ -9,7 +9,7 @@ using CommandLine;
 
 namespace fmsComversionConsole
 {
-    // convertToHls --videoFileName "C:\Brainshark\Fred.DTA.VDO\FredTrioProJazz.SMALL.mp4"
+    // convertToHls --videoFileName "C:\Fred.DTA.VDO\FredTrioProJazz.SMALL.mp4"
     [Verb("convertToHls", HelpText = "convertToHls")]
     public class ConversionHlsCommandLine
     {
