@@ -10,6 +10,7 @@ using CommandLine;
 namespace fmsComversionConsole
 {
     // convertToHls --videoFileName "C:\Fred.DTA.VDO\FredTrioProJazz.SMALL.mp4"
+    // convertToHls --1080Only --videoFileName "C:\VIDEO\ChatGPT4.GenerateMultiChoiceQuestion\ChatGPT4.GenerateMultiChoiceQuestion\MASTER\ChatGPT4.GenerateMultiChoiceQuestion\ChatGPT4.GenerateMultiChoiceQuestion.mp4"
     // convertToHls --videoFileName "https://fredcloud.blob.core.windows.net/public/sirosVariri.05.Video.FULL.mp4"
     // convertToHls --videoFileName "https://fredcloud.blob.core.windows.net/public/sirosVariri.05.Video.FULL.mp4"
     [Verb("convertToHls", HelpText = "convertToHls")]
@@ -23,6 +24,9 @@ namespace fmsComversionConsole
 
         [CommandLine.Option('h', "HlsFolder", Required = false, HelpText = "HlsFolder")]
         public string FFMPEG_EXE { get; set; } = @"C:\Tools\ffmpeg-4.2.1-win64-static\bin\ffmpeg.exe";
+
+        [CommandLine.Option('1', "1080Only", Required = false, HelpText = "1080Only")]
+        public bool _1080Only { get; set; }
 
         public string FMS_AZURE_STORAGE_CONNECTION_STRING => Environment.GetEnvironmentVariable("FMS_AZURE_STORAGE_CONNECTION_STRING");
     }
@@ -43,7 +47,7 @@ namespace fmsComversionConsole
                   {
                       var vc = new fms.VideoConverter(options.VideoFileName);
                       Trace(vc.GetVideoInfo());
-                      vc.ConvertToHls(options.HlsFolder, options.FFMPEG_EXE, options.FMS_AZURE_STORAGE_CONNECTION_STRING);
+                      var c = vc.ConvertToHls(options.HlsFolder, options.FFMPEG_EXE, options.FMS_AZURE_STORAGE_CONNECTION_STRING, options._1080Only);
                       return 0;
                   },
                   errs => 123
