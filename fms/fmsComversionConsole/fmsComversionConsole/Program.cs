@@ -18,6 +18,9 @@ namespace fmsComversionConsole
 
         [CommandLine.Option('h', "HlsFolder", Required = false, HelpText = "HlsFolder")]
         public string HlsFolder { get; set; } = "C:\\temp\\stream\\hls";
+
+        [CommandLine.Option('h', "HlsFolder", Required = false, HelpText = "HlsFolder")]
+        public string FFMPEG_EXE { get; set; } = @"C:\Tools\ffmpeg-4.2.1-win64-static\bin\ffmpeg.exe";
     }
 
     internal class Program
