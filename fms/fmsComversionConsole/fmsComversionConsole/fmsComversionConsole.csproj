@@ -113,6 +113,8 @@
     <Compile Include="Utility\ExecuteProgramUtilty.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utility\Logger.cs" />
+    <Compile Include="Utility\FileService.cs" />
     <Compile Include="VideoConversion\VideoConverter.cs" />
   </ItemGroup>
   <ItemGroup>
