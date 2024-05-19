@@ -143,8 +143,9 @@ namespace fms
             var parentFolder = Path.Combine(hlsFolder, fmsVideoId);
             var videoFolder = Path.Combine(parentFolder, fmsVideoId);
             var resolutions = new List<VideoResolution>();
-
             var c = new ConversionResult { InputVideo = _inputVideoFileNameOrUrl, fmsVideoId = fmsVideoId, LocalFolder = parentFolder, Resolutions = resolutions };
+
+            Logger.Trace($"[CONVERSION] {DS.Dictionary(new { c.InputVideo, c.fmsVideoId }).Format(preFix: "", postFix: "")}", this);
 
             Directory.CreateDirectory(parentFolder);
 
@@ -245,6 +246,7 @@ namespace fms
             }
             Logger.Trace($"{c.ToJson()}", this);
             Logger.Trace($"[SUMMARY] {DS.Dictionary(new { c.InputVideo, c.fmsVideoId, c.Duration, c.mu38MasterUrl }).Format(preFix:"", postFix:"")}", this);
+            Logger.Trace($@"[JAVASCRIPT] const url = ""{c.mu38MasterUrl}""; // {Path.GetFileName(c.InputVideo)}", this);
 
             return c;
         }

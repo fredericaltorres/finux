@@ -11,6 +11,13 @@ namespace fmsComversionConsole
 {
     // convertToHls --videoFileName "C:\Fred.DTA.VDO\FredTrioProJazz.SMALL.mp4"
     // convertToHls --1080Only --videoFileName "C:\VIDEO\ChatGPT4.GenerateMultiChoiceQuestion\ChatGPT4.GenerateMultiChoiceQuestion\MASTER\ChatGPT4.GenerateMultiChoiceQuestion\ChatGPT4.GenerateMultiChoiceQuestion.mp4"
+    // convertToHls --1080Only --videoFileName "C:\VIDEO\ChatGPT4.QuestionFacts\ChatGPT4.QuestionFacts\MASTER\ChatGPT4.QuestionFacts\ChatGPT4.QuestionFacts.mp4"
+    // convertToHls --1080Only --videoFileName "C:\VIDEO\EmbeddingVectorDBSimilaritySearch.JavaScript\EmbeddingVectorDBSimilaritySearch.JavaScript\MASTER\EmbeddingVectorDBSimilaritySearch.JavaScript\EmbeddingVectorDBSimilaritySearch.JavaScript.mp4"
+
+
+
+    // bad video convertToHls --1080Only --videoFileName "C:\VIDEO\ChatGPT4.HowMayYearKingOfFrance\ChatGPT4.HowMayYearKingOfFrance\MASTER\ChatGPT4.HowMayYearKingOfFrance\ChatGPT4.HowMayYearKingOfFrance.mp4"
+
     // convertToHls --videoFileName "https://fredcloud.blob.core.windows.net/public/sirosVariri.05.Video.FULL.mp4"
     // convertToHls --videoFileName "https://fredcloud.blob.core.windows.net/public/sirosVariri.05.Video.FULL.mp4"
     [Verb("convertToHls", HelpText = "convertToHls")]

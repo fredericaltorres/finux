@@ -124,8 +124,6 @@ namespace fms
                 }
 
                 Uri sasUri = blobClient.GenerateSasUri(sasBuilder);
-                Console.WriteLine("SAS URI for blob is: {0}", sasUri);
-                Console.WriteLine();
 
                 return sasUri;
             }
