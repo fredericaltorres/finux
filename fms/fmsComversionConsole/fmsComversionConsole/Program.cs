@@ -39,6 +39,7 @@ namespace fmsComversionConsole
                   {
                       var vc = new fms.VideoConverter(options.VideoFileName);
                       Trace(vc.GetVideoInfo());
+                      vc.ConvertToHls(options.HlsFolder, options.FFMPEG_EXE);
                       return 0;
                   },
                   errs => 123

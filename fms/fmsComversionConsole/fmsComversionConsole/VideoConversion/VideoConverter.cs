@@ -36,25 +36,26 @@ namespace fms
 
         public bool ConvertToHls(string hlsFolder, string ffmepexe)
         {
+            var preset = "medium";
             var videoIdName = Guid.NewGuid().ToString();
-            //var ffMpeg = new NReco.VideoConverter.FFMpegConverter();
-            //ffMpeg.ConvertMedia(_videoFileName, hlsFolder + "\\index.m3u8", NReco.VideoConverter.Format.hls);
-
             var sb = new StringBuilder();
 
 sb.Append($@"-i ""{_videoFileName}"" ");
-sb.Append(@"-filter_complex ""[0:v]split=2[v1][v2]; [v1]copy[v1out]; [v2]scale=w=960:h=540[v2out]"" ");
-sb.Append(@"-map ""[v1out]"" - c:v: 0 libx264 - x264 -params ""nal-hrd=cbr:force-cfr=1"" -b:v: 0 5M - maxrate:v:0 5M -minrate:v:0 5M -bufsize:v: 0 5M -preset ""$medium"" -g 48 -sc_threshold 0 -keyint_min 48 ");
-sb.Append(@"-map ""[v2out]"" - c:v: 1 libx264 - x264 -params ""nal-hrd=cbr:force-cfr=1"" -b:v: 1 3M - maxrate:v:1 3M -minrate:v:1 3M -bufsize:v: 1 3M -preset ""$medium"" -g 48 -sc_threshold 0 -keyint_min 48 ");
-sb.Append(@"-map a:0 -c:a:0 aac -b:a:0 128k -ac 2 ");
-sb.Append(@"-map a:0 -c:a:1 aac -b:a:1 128k -ac 2 ");
-sb.Append(@"-f hls -hls_time 2 -hls_playlist_type vod ");
-sb.Append(@"-hls_flags independent_segments -hls_segment_type mpegts ");
+sb.Append($@"-filter_complex ""[0:v]split=2[v1][v2]; [v1]copy[v1out]; [v2]scale=w=960:h=540[v2out]"" ");
+sb.Append($@"-map ""[v1out]"" -c:v:0 libx264 -x264-params ""nal-hrd=cbr:force-cfr=1"" -b:v:0 5M -maxrate:v:0 5M -minrate:v:0 5M -bufsize:v:0 5M -preset ""{preset}"" -g 48 -sc_threshold 0 -keyint_min 48 ");
+sb.Append($@"-map ""[v2out]"" -c:v:1 libx264 -x264-params ""nal-hrd=cbr:force-cfr=1"" -b:v:1 3M -maxrate:v:1 3M -minrate:v:1 3M -bufsize:v:1 3M -preset ""{preset}"" -g 48 -sc_threshold 0 -keyint_min 48 ");
+sb.Append($@"-map a:0 -c:a:0 aac -b:a:0 128k -ac 2 ");
+sb.Append($@"-map a:0 -c:a:1 aac -b:a:1 128k -ac 2 ");
+sb.Append($@"-f hls -hls_time 2 -hls_playlist_type vod ");
+sb.Append($@"-hls_flags independent_segments -hls_segment_type mpegts ");
 sb.Append($@"-hls_segment_filename ""{videoIdName}-%v/data%04d.ts"" -use_localtime_mkdir 1 ");
-sb.Append(@"-master_pl_name ""master.m3u8"" ");
-sb.Append($@"-var_stream_map ""v: 0,a: 0 v: 1,a: 1"" ""{videoIdName}-%v.m3u8""  ");
+sb.Append($@"-master_pl_name ""master.m3u8"" ");
+sb.Append($@"-var_stream_map ""v:0,a:0 v:1,a:1"" ""{videoIdName}-%v.m3u8""  ");
 
-            return true;
+            var exitCode = 0;
+            var r = ExecuteProgramUtilty.ExecProgram(ffmepexe, sb.ToString(), ref exitCode);
+
+            return r && exitCode == 0;
         }
     }
 }
