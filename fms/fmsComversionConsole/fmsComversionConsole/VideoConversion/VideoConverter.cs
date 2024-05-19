@@ -61,14 +61,27 @@ namespace fms
             public int KeyFrame { get; set; } = 48;
             public string Preset { get; set; } = "medium";
 
-            public string GetFFMPEGMapResolution(int resolutionIndex)
+            public string GetFFMPEGVideoMap(int resolutionIndex)
             {
-                return $@"-map ""[v{resolutionIndex}out]"" -c:v:0 libx264 -x264-params ""nal-hrd=cbr:force-cfr=1"" -b:v:0 {BitRateMegaBit}M -maxrate:v:0 {BitRateMegaBit}M -minrate:v:0 {BitRateMegaBit}M -bufsize:v:0 {BitRateMegaBit}M -preset ""{Preset}"" -g {KeyFrame} -sc_threshold 0 -keyint_min {KeyFrame}";
+                return $@"-map ""[v{resolutionIndex}out]"" -c:v:0 libx264 -x264-params ""nal-hrd=cbr:force-cfr=1"" -b:v:0 {BitRateMegaBit}M -maxrate:v:0 {BitRateMegaBit}M -minrate:v:0 {BitRateMegaBit}M -bufsize:v:0 {BitRateMegaBit}M -preset ""{Preset}"" -g {KeyFrame} -sc_threshold 0 -keyint_min {KeyFrame} ";
             }
             public string GetFFMPEGScaleResolution(int resolutionIndex, bool isLast)
             {
                 return $@"[v{resolutionIndex}]scale=w={Width}:h={Height}[v{resolutionIndex}out]{(isLast ? "":";")}";
             }
+
+            public string GetFFMPEGAudioMap(int resolutionIndex)
+            {
+                return $@"-map a:0 -c:a:{resolutionIndex} aac -b:a:{resolutionIndex} 128k -ac 2 ";
+            }
+
+            public string GetFFMPEGStreamMap(int resolutionIndex)
+            {
+                return $@"v:{resolutionIndex},a:{resolutionIndex} ";
+            }
+
+            
+
             public bool IsSquareResolution => Width == Height;
         }
 
@@ -143,18 +156,32 @@ namespace fms
             }
             sb.Append($@""" ");
 
+            //sb.Append($@"-map ""[v1out]"" -c:v:0 libx264 -x264-params ""nal-hrd=cbr:force-cfr=1"" -b:v:0 5M -maxrate:v:0 5M -minrate:v:0 5M -bufsize:v:0 5M -preset ""{preset}"" -g 48 -sc_threshold 0 -keyint_min 48 ");
+            //sb.Append($@"-map ""[v2out]"" -c:v:1 libx264 -x264-params ""nal-hrd=cbr:force-cfr=1"" -b:v:1 3M -maxrate:v:1 3M -minrate:v:1 3M -bufsize:v:1 3M -preset ""{preset}"" -g 48 -sc_threshold 0 -keyint_min 48 ");
 
-            sb.Append($@"-map ""[v1out]"" -c:v:0 libx264 -x264-params ""nal-hrd=cbr:force-cfr=1"" -b:v:0 5M -maxrate:v:0 5M -minrate:v:0 5M -bufsize:v:0 5M -preset ""{preset}"" -g 48 -sc_threshold 0 -keyint_min 48 ");
-            sb.Append($@"-map ""[v2out]"" -c:v:1 libx264 -x264-params ""nal-hrd=cbr:force-cfr=1"" -b:v:1 3M -maxrate:v:1 3M -minrate:v:1 3M -bufsize:v:1 3M -preset ""{preset}"" -g 48 -sc_threshold 0 -keyint_min 48 ");
-            sb.Append($@"-map a:0 -c:a:0 aac -b:a:0 128k -ac 2 ");
-            sb.Append($@"-map a:0 -c:a:1 aac -b:a:1 128k -ac 2 ");
+            for (var re = 0; re < resolutions.Count; re++)
+                sb.Append(resolutions[re].GetFFMPEGVideoMap(re+1));
+
+            for (var re = 0; re < resolutions.Count; re++)
+                sb.Append(resolutions[re].GetFFMPEGAudioMap(re + 1));
+            //sb.Append($@"-map a:0 -c:a:0 aac -b:a:0 128k -ac 2 ");
+            //sb.Append($@"-map a:0 -c:a:1 aac -b:a:1 128k -ac 2 ");
+
             sb.Append($@"-f hls -hls_time 2 -hls_playlist_type vod ");
             sb.Append($@"-hls_flags independent_segments -hls_segment_type mpegts ");
-
             sb.Append($@"-hls_segment_filename ""{videoFolder}-%v/data%04d.ts"" -use_localtime_mkdir 1 ");
 
             sb.Append($@"-master_pl_name ""master.m3u8"" ");
-            sb.Append($@"-var_stream_map ""v:0,a:0 v:1,a:1"" ""{videoFolder}-%v.m3u8""  ");
+            //sb.Append($@"-var_stream_map ""v:0,a:0 v:1,a:1"" ");
+            sb.Append($@"-var_stream_map """);
+
+            for (var re = 0; re < resolutions.Count; re++)
+                sb.Append(resolutions[re].GetFFMPEGStreamMap(re));
+
+            sb.Remove(sb.Length - 1, 1);
+
+            sb.Append($@""" ");
+            sb.Append($@" ""{videoFolder}-%v.m3u8"" ");
 
             Logger.Trace($"[CONVERTING] {sb}", this);
 
