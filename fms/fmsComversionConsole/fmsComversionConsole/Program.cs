@@ -11,6 +11,7 @@ namespace fmsComversionConsole
 {
     // convertToHls --videoFileName "C:\Fred.DTA.VDO\FredTrioProJazz.SMALL.mp4"
     // convertToHls --videoFileName "https://fredcloud.blob.core.windows.net/public/sirosVariri.05.Video.FULL.mp4"
+    // convertToHls --videoFileName "https://fredcloud.blob.core.windows.net/public/sirosVariri.05.Video.FULL.mp4"
     [Verb("convertToHls", HelpText = "convertToHls")]
     public class ConversionHlsCommandLine
     {
@@ -22,6 +23,8 @@ namespace fmsComversionConsole
 
         [CommandLine.Option('h', "HlsFolder", Required = false, HelpText = "HlsFolder")]
         public string FFMPEG_EXE { get; set; } = @"C:\Tools\ffmpeg-4.2.1-win64-static\bin\ffmpeg.exe";
+
+        public string FMS_AZURE_STORAGE_CONNECTION_STRING => Environment.GetEnvironmentVariable("FMS_AZURE_STORAGE_CONNECTION_STRING");
     }
 
     internal class Program
@@ -40,7 +43,7 @@ namespace fmsComversionConsole
                   {
                       var vc = new fms.VideoConverter(options.VideoFileName);
                       Trace(vc.GetVideoInfo());
-                      vc.ConvertToHls(options.HlsFolder, options.FFMPEG_EXE);
+                      vc.ConvertToHls(options.HlsFolder, options.FFMPEG_EXE, options.FMS_AZURE_STORAGE_CONNECTION_STRING);
                       return 0;
                   },
                   errs => 123

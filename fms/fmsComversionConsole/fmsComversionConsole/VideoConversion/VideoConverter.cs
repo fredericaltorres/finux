@@ -106,14 +106,16 @@ namespace fms
         };
 
         // https://www.youtube.com/watch?v=xJQBnrJXyv4 Download HLS Streaming Video with PowerShell and FFMPEG
-        public bool ConvertToHls(string hlsFolder, string ffmepexe)
+        public bool ConvertToHls(string hlsFolder, string ffmepexe, string azureStorageConnectionString)
         {
+            // UploadToAzureStorage(@"C:\temp\stream\hls\de8c799e-6b7d-47dc-9bc7-ea06cb8a533d", "de8c799e-6b7d-47dc-9bc7-ea06cb8a533d", azureStorageConnectionString);
+
             var preset = "medium";
-            var videoIdName = Guid.NewGuid().ToString();
-            var parentFolder = Path.Combine(hlsFolder, videoIdName);
+            var fmdVideoId = Guid.NewGuid().ToString();
+            var parentFolder = Path.Combine(hlsFolder, fmdVideoId);
             Directory.CreateDirectory(parentFolder);
 
-            var videoFolder = Path.Combine(parentFolder, videoIdName);
+            var videoFolder = Path.Combine(parentFolder, fmdVideoId);
 
             var resolutions = new List<VideoResolution>();
 
@@ -192,7 +194,8 @@ namespace fms
 
             if (ok)
             {
-                FixPathInM3U8(parentFolder, videoFolder, videoIdName);
+                FixPathInM3U8(parentFolder, videoFolder, fmdVideoId);
+                UploadToAzureStorage(parentFolder, fmdVideoId, azureStorageConnectionString);
             }
             else 
             {
@@ -200,6 +203,30 @@ namespace fms
             }
 
             return ok;
+        }
+
+        private void UploadToAzureStorage(string parentFolder, string fmsVideoId, string azureStorageConnectionString)
+        {
+            var bm = new BlobManager(azureStorageConnectionString);
+            bm.CreateBlobContainer(fmsVideoId).GetAwaiter().GetResult();
+            var files = Directory.GetFiles(parentFolder, "*.m3u8").ToList();
+            foreach (var f in files)
+            {
+                var blobName = Path.GetFileName(f);
+                bm.UploadBlobStreamAsync(fmsVideoId, blobName, File.OpenRead(f)).GetAwaiter().GetResult();
+            }
+
+            var resolutionFolders = files.Select(ff => Path.GetFileNameWithoutExtension(ff)).ToList().Filter(f => !f.Contains("master")).ToList();
+
+            foreach(var rf in resolutionFolders)
+            {
+                var filesInResolution = Directory.GetFiles(parentFolder, $"{rf}\\*.ts").ToList();
+                foreach (var f in filesInResolution)
+                {
+                    var blobName = Path.Combine(rf, Path.GetFileName(f));
+                    bm.UploadBlobStreamAsync(fmsVideoId, blobName, File.OpenRead(f)).GetAwaiter().GetResult();
+                }
+            }
         }
     }
 }
