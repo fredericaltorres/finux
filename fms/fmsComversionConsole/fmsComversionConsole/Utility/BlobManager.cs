@@ -129,7 +129,7 @@ namespace fms
             }
             else
             {
-                throw new Exception(@"BlobClient must be authorized with Shared Key credentials to create a service SAS.");
+                throw new Exception(@"Authoriztion issue");
             }
         }
         

@@ -48,6 +48,9 @@
     <Reference Include="DynamicSugarStandard, Version=1.0.30.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\DynamicSugarStandard.1.0.30\lib\netstandard2.0\DynamicSugarStandard.dll</HintPath>
     </Reference>
+    <Reference Include="M3U8Parser, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\M3U8Parser.1.0.2\lib\netstandard2.0\M3U8Parser.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.1.1.1\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
@@ -109,12 +112,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommandLine\BaseCommandLine.cs" />
+    <Compile Include="CommandLine\ConcatHlsCommandLine.cs" />
+    <Compile Include="CommandLine\ConversionHlsCommandLine.cs" />
     <Compile Include="Utility\BlobManager.cs" />
     <Compile Include="Utility\ExecuteProgramUtilty.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\Logger.cs" />
-    <Compile Include="Utility\FileService.cs" />
+    <Compile Include="Utility\DirectoryService.cs" />
+    <Compile Include="VideoConversion\HlsManager.cs" />
     <Compile Include="VideoConversion\VideoConverter.cs" />
   </ItemGroup>
   <ItemGroup>

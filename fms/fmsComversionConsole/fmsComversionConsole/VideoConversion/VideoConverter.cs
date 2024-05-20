@@ -207,11 +207,12 @@ namespace fms
                 sb.Append(resolutions[re].GetVideoMapCmd(re+1));
 
             for (var re = 0; re < resolutions.Count; re++)
-                sb.Append(resolutions[re].GetAudioMapCmd(re + 1));
+                sb.Append(resolutions[re].GetAudioMapCmd(re + 1)); // todo increase quality of audio
             //sb.Append($@"-map a:0 -c:a:0 aac -b:a:0 128k -ac 2 ");
             //sb.Append($@"-map a:0 -c:a:1 aac -b:a:1 128k -ac 2 ");
 
             // Hls configuration
+            // todo: segment size should be configurable and 10s
             sb.Append($@"-f hls -hls_time 2 -hls_playlist_type vod ");
             sb.Append($@"-hls_flags independent_segments -hls_segment_type mpegts ");
             sb.Append($@"-hls_segment_filename ""{videoFolder}-%v/data%04d.ts"" -use_localtime_mkdir 1 ");
