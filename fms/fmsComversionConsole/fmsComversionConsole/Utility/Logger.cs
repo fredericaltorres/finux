@@ -28,7 +28,7 @@ namespace fAI
             return Trace($"[ERROR]{message}", This, methodName);
         }
 
-        public static string Trace(string message, object This, [CallerMemberName] string methodName = "")
+        public static string Trace(string message, object This,  bool replaceCRLF = true, [CallerMemberName] string methodName = "")
         {
             if (TraceOn)
             {
@@ -36,7 +36,9 @@ namespace fAI
                 if (className.StartsWith("<"))
                     className = "";
 
-                var m = $"{DateTime.Now}|[{className}{methodName}()]{message}".Replace(Environment.NewLine, "").Replace("\n", "").Replace("\r", "");
+                var m = $"{DateTime.Now}|[{className}{methodName}()]{message}";
+                if(replaceCRLF)
+                    m = m.Replace(Environment.NewLine, "").Replace("\n", "").Replace("\r", "");
 
                 if (TraceToConsole)
                     Console.WriteLine(m);

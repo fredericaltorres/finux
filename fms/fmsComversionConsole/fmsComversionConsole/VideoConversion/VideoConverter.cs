@@ -62,6 +62,7 @@ namespace fms
             public int BitRateMegaBit { get; set; }
             public int KeyFrame { get; set; } = 48;
             public string Preset { get; set; } = "medium";
+            public int SegmentDurationSeconds { get; set; } = 6;
 
             public string GetVideoMapCmd(int resolutionIndex)
             {
@@ -103,8 +104,8 @@ namespace fms
             ["1080x1080p"]  = new VideoResolution() { Width = 1080, Height = 1080, Name = "1080x1080p", BitRateMegaBit = 5, Preset = "medium", KeyFrame = 48 },
             ["720p"]        = new VideoResolution() { Width = 1280, Height =  720, Name = "720p",       BitRateMegaBit = 3, Preset = "medium", KeyFrame = 48 },
             ["720x720p"]    = new VideoResolution() { Width =  720, Height =  720, Name = "720x720p",   BitRateMegaBit = 3, Preset = "medium", KeyFrame = 48 },
-            ["480p"]        = new VideoResolution() { Width = 640, Height = 480, Name = "480p",         BitRateMegaBit = 2, Preset = "medium", KeyFrame = 48 },
-            ["480x480p"]    = new VideoResolution() { Width = 480, Height = 480, Name = "480x480p",     BitRateMegaBit = 2, Preset = "medium", KeyFrame = 48 },
+            ["480p"]        = new VideoResolution() { Width =  640, Height =  480, Name = "480p",       BitRateMegaBit = 2, Preset = "medium", KeyFrame = 48 },
+            ["480x480p"]    = new VideoResolution() { Width =  480, Height =  480, Name = "480x480p",   BitRateMegaBit = 2, Preset = "medium", KeyFrame = 48 },
         };
 
         public class ConversionResult
@@ -211,9 +212,11 @@ namespace fms
             //sb.Append($@"-map a:0 -c:a:0 aac -b:a:0 128k -ac 2 ");
             //sb.Append($@"-map a:0 -c:a:1 aac -b:a:1 128k -ac 2 ");
 
+            var hls_time = resolutions[0].SegmentDurationSeconds;
+
             // Hls configuration
             // todo: segment size should be configurable and 10s
-            sb.Append($@"-f hls -hls_time 2 -hls_playlist_type vod ");
+            sb.Append($@"-f hls -hls_time {hls_time} -hls_playlist_type vod ");
             sb.Append($@"-hls_flags independent_segments -hls_segment_type mpegts ");
             sb.Append($@"-hls_segment_filename ""{videoFolder}-%v/data%04d.ts"" -use_localtime_mkdir 1 ");
 
