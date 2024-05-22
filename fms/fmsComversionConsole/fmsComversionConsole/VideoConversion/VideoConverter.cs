@@ -255,6 +255,17 @@ namespace fms
             return c;
         }
 
+        private string GetContentType(string fileName)
+        {
+            var ext = Path.GetExtension(fileName).ToLower();
+            switch (ext)
+            {
+                case ".m3u8": return "application/vnd.apple.mpegurl";//"application/x-mpegURL";
+                case ".ts"  : return "video/MP2T";
+                default     : return "application/octet-stream";
+            }
+        }
+
         private string UploadToAzureStorage(string parentFolder, string fmsVideoId, string azureStorageConnectionString)
         {
             Logger.Trace($"Uploading to Azure fmsVideoId:{fmsVideoId}", this);
@@ -266,7 +277,7 @@ namespace fms
             foreach (var f in files)
             {
                 var blobName = Path.GetFileName(f);
-                bm.UploadBlobStreamAsync(containerName, blobName, File.OpenRead(f)).GetAwaiter().GetResult();
+                bm.UploadBlobStreamAsync(containerName, blobName, File.OpenRead(f), GetContentType(f)).GetAwaiter().GetResult();
             }
 
             r = bm.GetBlobURL(containerName, "master.m3u8").ToString();
@@ -279,7 +290,7 @@ namespace fms
                 foreach (var f in filesInResolution)
                 {
                     var blobName = Path.Combine(rf, Path.GetFileName(f));
-                    bm.UploadBlobStreamAsync(containerName, blobName, File.OpenRead(f)).GetAwaiter().GetResult();
+                    bm.UploadBlobStreamAsync(containerName, blobName, File.OpenRead(f), GetContentType(f)).GetAwaiter().GetResult();
                 }
             }
             return r;

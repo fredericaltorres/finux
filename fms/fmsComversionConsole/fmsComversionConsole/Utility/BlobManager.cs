@@ -82,18 +82,29 @@ namespace fms
             return -1;
         }
 
-        public async Task<BlobContentInfo> UploadBlobStreamAsync(string containerName, string targetBlobName, Stream sourceStream)
+        public async Task<BlobContentInfo> UploadBlobStreamAsync(string containerName, string targetBlobName, Stream sourceStream, string contentType)
         {
             BlobContainerClient container = blobServiceClient.GetBlobContainerClient(containerName);
 
             await container.CreateIfNotExistsAsync(PublicAccessType.Blob, null);
+            var blobClient = container.GetBlobClient(targetBlobName);
 
-            var blobClient=container.GetBlobClient(targetBlobName);
+            var uploadOptions = new BlobUploadOptions();
+            if (contentType != null) 
+            {
+                uploadOptions = new BlobUploadOptions
+                {
+                    HttpHeaders = new BlobHttpHeaders
+                    {
+                        ContentType = contentType
+                    }
+                };
+            }
 
             var blobExists = await blobClient.ExistsAsync();
             if (!blobExists)
             {
-                var response = await blobClient.UploadAsync(sourceStream);
+                var response = await blobClient.UploadAsync(sourceStream, uploadOptions);
                 return response;
             }
 
