@@ -102,10 +102,12 @@ namespace fms
         {
             ["1080p"]       = new VideoResolution() { Width = 1920, Height = 1080, Name = "1080p",      BitRateMegaBit = 5, Preset = "medium", KeyFrame = 48 },
             ["1080x1080p"]  = new VideoResolution() { Width = 1080, Height = 1080, Name = "1080x1080p", BitRateMegaBit = 5, Preset = "medium", KeyFrame = 48 },
-            ["720p"]        = new VideoResolution() { Width = 1280, Height =  720, Name = "720p",       BitRateMegaBit = 3, Preset = "medium", KeyFrame = 48 },
-            ["720x720p"]    = new VideoResolution() { Width =  720, Height =  720, Name = "720x720p",   BitRateMegaBit = 3, Preset = "medium", KeyFrame = 48 },
-            ["480p"]        = new VideoResolution() { Width =  640, Height =  480, Name = "480p",       BitRateMegaBit = 2, Preset = "medium", KeyFrame = 48 },
-            ["480x480p"]    = new VideoResolution() { Width =  480, Height =  480, Name = "480x480p",   BitRateMegaBit = 2, Preset = "medium", KeyFrame = 48 },
+            ["720p"]        = new VideoResolution() { Width = 1280, Height =  720, Name = "720p",       BitRateMegaBit = 1, Preset = "medium", KeyFrame = 48 },
+            ["720x720p"]    = new VideoResolution() { Width =  720, Height =  720, Name = "720x720p",   BitRateMegaBit = 1, Preset = "medium", KeyFrame = 48 },
+            ["480p"]        = new VideoResolution() { Width =  640, Height =  480, Name = "480p",       BitRateMegaBit = 1, Preset = "medium", KeyFrame = 48 },
+            ["480x480p"]    = new VideoResolution() { Width =  480, Height =  480, Name = "480x480p",   BitRateMegaBit = 1, Preset = "medium", KeyFrame = 48 },
+            ["320x240p"]    = new VideoResolution() { Width =  320, Height =  240, Name = "320x240p",   BitRateMegaBit = 1, Preset = "medium", KeyFrame = 48 },
+            ["240x240p"]    = new VideoResolution() { Width =  240, Height =  240, Name = "240x240p",   BitRateMegaBit = 1, Preset = "medium", KeyFrame = 48 },
         };
 
         public class ConversionResult
@@ -150,6 +152,16 @@ namespace fms
 
             Directory.CreateDirectory(parentFolder);
 
+            if (this.Height >= 720)
+                resolutions.Add(VideoResolutions["720x720p"]);
+
+            if (this.Height >= 480)
+                resolutions.Add(VideoResolutions["480x480p"]);
+
+            if (this.Height >= 240)
+                resolutions.Add(VideoResolutions["240x240p"]);
+
+            /*
             if (this.IsSquareResolution)
             {
                 if (this.Height >= 1080)
@@ -177,7 +189,7 @@ namespace fms
                     if (this.Height >= 480)
                         resolutions.Add(VideoResolutions["480p"]);
                 }
-            }
+            }*/
 
             var sb = new StringBuilder();
 
