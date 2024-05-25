@@ -110,6 +110,8 @@ namespace fms
             ["240x240p"]    = new VideoResolution() { Width =  240, Height =  240, Name = "240x240p",   BitRateMegaBit = 1, Preset = "medium", KeyFrame = 48 },
         };
 
+        public static List<string> VideoResolutionAvailable = VideoResolutions.Keys.ToList();
+
         public class ConversionResult
         {
             public string InputVideo { get; set; }
@@ -140,9 +142,11 @@ namespace fms
         }
 
         // https://www.youtube.com/watch?v=xJQBnrJXyv4 Download HLS Streaming Video with PowerShell and FFMPEG
-        public ConversionResult ConvertToHls(string hlsFolder, string ffmepexe, string azureStorageConnectionString, bool _1080pOnly)
+        public ConversionResult ConvertToHls(string hlsFolder, string ffmepexe, string azureStorageConnectionString, List<string> resolutionKeys, string cdnHost, string fmsVideoId = null)
         {
-            var fmsVideoId = Guid.NewGuid().ToString();
+            if (string.IsNullOrEmpty(fmsVideoId))
+                fmsVideoId = Guid.NewGuid().ToString();
+
             var parentFolder = Path.Combine(hlsFolder, fmsVideoId);
             var videoFolder = Path.Combine(parentFolder, fmsVideoId);
             var resolutions = new List<VideoResolution>();
@@ -152,44 +156,15 @@ namespace fms
 
             Directory.CreateDirectory(parentFolder);
 
-            if (this.Height >= 720)
-                resolutions.Add(VideoResolutions["720x720p"]);
-
-            if (this.Height >= 480)
-                resolutions.Add(VideoResolutions["480x480p"]);
-
-            if (this.Height >= 240)
-                resolutions.Add(VideoResolutions["240x240p"]);
-
-            /*
-            if (this.IsSquareResolution)
+            foreach(var rk in resolutionKeys)
             {
-                if (this.Height >= 1080)
-                    resolutions.Add(VideoResolutions["1080x1080p"]);
-
-                if (!_1080pOnly)
+                if (VideoResolutions.ContainsKey(rk))
                 {
-                    if (this.Height >= 720)
-                        resolutions.Add(VideoResolutions["720x720p"]);
-
-                    if (this.Height >= 480)
-                        resolutions.Add(VideoResolutions["480x480p"]);
+                    var videoResolution = VideoResolutions[rk];
+                    if (this.Height >= videoResolution.Height)
+                        resolutions.Add(videoResolution);
                 }
             }
-            else
-            {
-                if (this.Height >= 1080)
-                    resolutions.Add(VideoResolutions["1080p"]);
-
-                if (!_1080pOnly)
-                {
-                    if (this.Height >= 720)
-                        resolutions.Add(VideoResolutions["720p"]);
-
-                    if (this.Height >= 480)
-                        resolutions.Add(VideoResolutions["480p"]);
-                }
-            }*/
 
             var sb = new StringBuilder();
 
@@ -254,7 +229,7 @@ namespace fms
             if (c.Success)
             {
                 FixPathInM3U8(parentFolder, videoFolder, fmsVideoId);
-                c.mu38MasterUrl = UploadToAzureStorage(parentFolder, fmsVideoId, azureStorageConnectionString);
+                c.mu38MasterUrl = UploadToAzureStorage(parentFolder, fmsVideoId, azureStorageConnectionString, cdnHost);
             }
             else 
             {
@@ -278,7 +253,25 @@ namespace fms
             }
         }
 
-        private string UploadToAzureStorage(string parentFolder, string fmsVideoId, string azureStorageConnectionString)
+        private static string ReplaceHostInUri(string originalUrl, string newHost)
+        {
+            Uri originalUri = new Uri(originalUrl);
+            UriBuilder builder = new UriBuilder(originalUri);
+            builder.Host = newHost;
+            Uri newUri = builder.Uri;
+            return newUri.ToString();
+        }
+
+        private static string RemoveQueryStringFromUri(string originalUrl)
+        {
+            Uri originalUri = new Uri(originalUrl);
+            UriBuilder builder = new UriBuilder(originalUri);
+            builder.Query = string.Empty;
+            Uri newUri = builder.Uri;
+            return newUri.ToString();
+        }
+
+        private string UploadToAzureStorage(string parentFolder, string fmsVideoId, string azureStorageConnectionString, string cdnHost)
         {
             Logger.Trace($"Uploading to Azure fmsVideoId:{fmsVideoId}", this);
             var containerName = fmsVideoId;
@@ -292,7 +285,9 @@ namespace fms
                 bm.UploadBlobStreamAsync(containerName, blobName, File.OpenRead(f), GetContentType(f)).GetAwaiter().GetResult();
             }
 
-            r = bm.GetBlobURL(containerName, "master.m3u8").ToString();
+            var masterUrlDirectFromStorage = bm.GetBlobURL(containerName, "master.m3u8").ToString();
+            var masterUrlFromCDN = ReplaceHostInUri(masterUrlDirectFromStorage, cdnHost);
+            masterUrlFromCDN = RemoveQueryStringFromUri(masterUrlFromCDN);
 
             var resolutionFolders = files.Select(ff => Path.GetFileNameWithoutExtension(ff)).ToList().Filter(f => !f.Contains("master")).ToList();
 
@@ -305,7 +300,7 @@ namespace fms
                     bm.UploadBlobStreamAsync(containerName, blobName, File.OpenRead(f), GetContentType(f)).GetAwaiter().GetResult();
                 }
             }
-            return r;
+            return masterUrlFromCDN;
         }
     }
 }

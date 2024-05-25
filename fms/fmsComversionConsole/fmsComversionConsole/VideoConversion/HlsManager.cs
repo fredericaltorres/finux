@@ -12,10 +12,11 @@ namespace fms
 {
     public class HlsManager
     {
+        private static WebClient _client = new WebClient();
         private readonly string _hlsMasterM3U8Url;
-        MasterPlaylist _masterPlayList;
-        
 
+        private MasterPlaylist _masterPlayList;
+        
         public string m3u8MasterFile = Path.Combine(@"c:\temp", "master.m3u8");
 
         public List<string> ResolutionM3u8Urls { get; set; } = new List<string>();
@@ -64,7 +65,6 @@ namespace fms
             return url.Substring(0, x);
         }
 
-
         public void Analyse()
         {
             var hlsRootUrl = GetMasterRelativePath(this._hlsMasterM3U8Url);
@@ -112,7 +112,7 @@ namespace fms
             return sb.ToString();
         }
 
-        static WebClient _client = new WebClient();
+        
 
         public string DownloadHlsFile(string hlsM3U8Url, string m3u8OutputFile)
         {
