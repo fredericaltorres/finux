@@ -16,7 +16,7 @@ using System.Diagnostics;
 
 namespace fms
 {
-    public class VideoConverter
+    public class VideoManager
     {
         public string _inputVideoFileNameOrUrl { get; }
         private MediaInfo _mediaInfo { get; set; }
@@ -28,7 +28,7 @@ namespace fms
         public StreamInfo GetVideoStream => _mediaInfo.Streams.Where(s => s.CodecType == "video").FirstOrDefault();
         public StreamInfo GetAudioStream => _mediaInfo.Streams.Where(s => s.CodecType == "audio").FirstOrDefault();
 
-        public VideoConverter(string videoFileName)
+        public VideoManager(string videoFileName)
         {
             _inputVideoFileNameOrUrl = videoFileName;
             var ffProbe = new NReco.VideoInfo.FFProbe();
@@ -44,10 +44,10 @@ namespace fms
 
             var v = _mediaInfo;
             sb.Append(DS.Dictionary(new { v.FormatName, v.Duration, StreamsCount = v.Streams.ToList().Count }).Format()).AppendLine();
+
             foreach (var s in v.Streams)
-            {
                 sb.Append(DS.Dictionary(new {s.CodecName, s.CodecType, s.FrameRate, s.Width, s.Height, s.PixelFormat }).Format()).AppendLine();
-            }
+
             return sb.ToString();
         }
 
@@ -237,7 +237,7 @@ namespace fms
             }
             Logger.Trace($"{c.ToJson()}", this);
             Logger.Trace($"[SUMMARY] {DS.Dictionary(new { c.InputVideo, c.fmsVideoId, c.Duration, c.mu38MasterUrl }).Format(preFix:"", postFix:"")}", this);
-            Logger.Trace($@"[JAVASCRIPT] const url = ""{c.mu38MasterUrl}""; // {Path.GetFileName(c.InputVideo)}", this);
+            Logger.Trace($@"[JAVASCRIPT] const cdn_url = ""{c.mu38MasterUrl}""; // {Path.GetFileName(c.InputVideo)}", this);
 
             return c;
         }

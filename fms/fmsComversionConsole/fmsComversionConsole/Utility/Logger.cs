@@ -23,16 +23,19 @@ namespace fAI
             File.AppendAllText(LogFileName, message + Environment.NewLine);
         }
 
-        public static string TraceError(string message, object This, [CallerMemberName] string methodName = "")
+        public static string TraceError(string message, object This = null, [CallerMemberName] string methodName = "")
         {
             return Trace($"[ERROR]{message}", This, methodName);
         }
 
-        public static string Trace(string message, object This,  bool replaceCRLF = true, [CallerMemberName] string methodName = "")
+        public static string Trace(string message, object This = null,  bool replaceCRLF = true, [CallerMemberName] string methodName = "")
         {
             if (TraceOn)
             {
-                var className = This.GetType().Name + ".";
+                var className = string.Empty;
+                if(This != null)
+                    className = This.GetType().Name + ".";
+
                 if (className.StartsWith("<"))
                     className = "";
 
@@ -63,7 +66,7 @@ namespace fAI
             return Trace(s, This, methodName);
         }
 
-        public static T Trace<T>(T ex)
+        public static T TraceError<T>(T ex)
         {
             if (ex is Exception)
             {

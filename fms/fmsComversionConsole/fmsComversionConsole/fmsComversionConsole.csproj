@@ -115,6 +115,7 @@
     <Compile Include="CommandLine\BaseCommandLine.cs" />
     <Compile Include="CommandLine\ConcatHlsCommandLine.cs" />
     <Compile Include="CommandLine\ConversionHlsCommandLine.cs" />
+    <Compile Include="CommandLine\VideoInfoCommandLine.cs" />
     <Compile Include="Utility\BlobManager.cs" />
     <Compile Include="Utility\ExecuteProgramUtilty.cs" />
     <Compile Include="Program.cs" />
@@ -122,7 +123,7 @@
     <Compile Include="Utility\Logger.cs" />
     <Compile Include="Utility\DirectoryService.cs" />
     <Compile Include="VideoConversion\HlsManager.cs" />
-    <Compile Include="VideoConversion\VideoConverter.cs" />
+    <Compile Include="VideoConversion\VideoManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
