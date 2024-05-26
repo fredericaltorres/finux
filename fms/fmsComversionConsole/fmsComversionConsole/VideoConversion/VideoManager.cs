@@ -150,7 +150,7 @@ namespace fms
             if (c.Success)
             {
                 FixPathInM3U8(parentFolder, videoFolder, fmsVideoId);
-                c.mu38MasterUrl = UploadToAzureStorage(parentFolder, fmsVideoId, azureStorageConnectionString, cdnHost);
+                c.mu38MasterUrl = UploadToAzureStorage(this._inputVideoFileNameOrUrl, parentFolder, fmsVideoId, azureStorageConnectionString, cdnHost);
             }
             else 
             {
@@ -192,13 +192,19 @@ namespace fms
             return newUri.ToString();
         }
 
-        private string UploadToAzureStorage(string parentFolder, string fmsVideoId, string azureStorageConnectionString, string cdnHost)
+        private string UploadToAzureStorage(string orginalVideo, string parentFolder, string fmsVideoId, string azureStorageConnectionString, string cdnHost)
         {
             Logger.Trace($"Uploading to Azure fmsVideoId:{fmsVideoId}", this);
             var containerName = fmsVideoId;
             var r = string.Empty;
             var bm = new BlobManager(azureStorageConnectionString);
             bm.CreateBlobContainer(fmsVideoId).GetAwaiter().GetResult();
+
+            // Upload the original video
+            var orginalVideoBlobName = Path.GetFileName(orginalVideo);
+            bm.UploadBlobStreamAsync(containerName, orginalVideoBlobName, File.OpenRead(orginalVideo), GetContentType(orginalVideo)).GetAwaiter().GetResult();
+
+
             var files = Directory.GetFiles(parentFolder, "*.m3u8").ToList();
             foreach (var f in files)
             {
