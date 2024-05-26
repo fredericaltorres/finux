@@ -13,7 +13,13 @@ namespace fmsComversionConsole
         [CommandLine.Option('m', "mp4FileName", Required = false, HelpText = "mp4FileName")]
         public string Mp4FileName { get; set; }
 
+
+        [CommandLine.Option('b', "bitRateKb", Required = false, HelpText = "bitRateKb")]
+        public int BitRateKb { get; set; } = 512;
+
         [CommandLine.Option('g', "gifFileName", Required = false, HelpText = "VideoFileName")]
         public string GifFileName { get; set; }
+
+
     }
 }

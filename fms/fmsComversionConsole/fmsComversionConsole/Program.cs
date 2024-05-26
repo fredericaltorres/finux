@@ -39,7 +39,6 @@ namespace fmsComversionConsole
                       var data = hlsM.GetMasterInfo();
                       Logger.Trace($"{data}", new { }, replaceCRLF: false);
                       Trace(data);
-                      Console.ReadLine();
                       return 0;
                   },
                   (VideoInfoCommandLine options) =>
@@ -52,7 +51,7 @@ namespace fmsComversionConsole
                   {
                       var vc = new fms.VideoManager(options.GifFileName);
                       Trace(vc.GetVideoInfo());
-                      vc.ConvertGifToMp4(options.Mp4FileName, options.FFMPEG_EXE);
+                      vc.ConvertGifToMp4(options.Mp4FileName, options.BitRateKb, options.FFMPEG_EXE);
                       return 0;
                   },
                   

@@ -41,8 +41,9 @@ namespace fms
             var sb = new StringBuilder();
             sb.Append($"file: {this._inputVideoFileNameOrUrl}").AppendLine();
 
+            var fileSize = new FileInfo(this._inputVideoFileNameOrUrl).Length;
             var v = _mediaInfo;
-            sb.Append(DS.Dictionary(new { v.FormatName, v.Duration, StreamsCount = v.Streams.ToList().Count }).Format()).AppendLine();
+            sb.Append(DS.Dictionary(new { fileSize, v.FormatName, v.Duration, StreamsCount = v.Streams.ToList().Count }).Format()).AppendLine();
 
             foreach (var s in v.Streams)
                 sb.Append(DS.Dictionary(new {s.CodecName, s.CodecType, s.FrameRate, s.Width, s.Height, s.PixelFormat }).Format()).AppendLine();
@@ -223,7 +224,7 @@ namespace fms
             return masterUrlFromCDN;
         }
 
-        public GifToMp4ConversionResult ConvertGifToMp4(string mp4FileName, string ffmepexe)
+        public GifToMp4ConversionResult ConvertGifToMp4(string mp4FileName, int bitRateKb, string ffmepexe)
         {
             using (var tfh = new TestFileHelper()) {
 
@@ -232,6 +233,13 @@ namespace fms
                 var r = new GifToMp4ConversionResult { InputFile = this._inputVideoFileNameOrUrl };
                 var sb = new StringBuilder();
                 sb.Append($@"-i ""{this._inputVideoFileNameOrUrl}"" -movflags faststart -pix_fmt yuv420p -vf ""scale=trunc(iw/2)*2:trunc(ih/2)*2"" ""{mp4FileName}"" ");
+
+                // sb.Append($@" -f gif -i ""{this._inputVideoFileNameOrUrl}"" ""{mp4FileName}"" ");
+                //sb.Append($@" -i ""{this._inputVideoFileNameOrUrl}"" -c:v libvpx -crf 12 -b:v 500K ""{mp4FileName}"" ");
+                                //  
+
+                // ffmpeg -f gif -i infile.gif outfile.mp4
+
                 r.FFMPEGCommandLine = sb.ToString();
                 var exitCode = 0;
                 var rr = ExecuteProgramUtilty.ExecProgram(ffmepexe, sb.ToString(), ref exitCode);
@@ -244,7 +252,15 @@ namespace fms
                     var r2 = AddBlankAudioTrack(mp4FileName, ffmepexe, tfh);
                     if (r2.Success)
                     {
-                        File.Copy(r2.Mp4FileName, mp4FileName, true);
+                        var r3 = ChangeBitrate(r2.Mp4FileName, bitRateKb, ffmepexe, tfh);
+                        if(r3.Success)
+                        {
+                            File.Copy(r3.Mp4FileName, mp4FileName, true);
+                        }
+                        else
+                        {
+                            r.Success = false;
+                        }
                     }
                     else
                     {
@@ -260,7 +276,6 @@ namespace fms
             }
         }
 
-
         public AddAudioTrackResult AddBlankAudioTrack(string mp4FileName, string ffmepexe, TestFileHelper tfh)
         {
             var mp4FileNameWithAudio = tfh.GetTempFileName("mp4");
@@ -272,7 +287,55 @@ namespace fms
             var exitCode = 0;
             var rr = ExecuteProgramUtilty.ExecProgram(ffmepexe, sb.ToString(), ref exitCode);
             r.Success = rr && exitCode == 0;
-            r.Mp4FileName = mp4FileName;
+            r.Done();
+
+            if (r.Success)
+            {
+            }
+            else
+            {
+            }
+            Logger.Trace($"{r.ToJson()}", this);
+
+            return r;
+        }
+
+        public ChangeBitRateConversionResult ChangeBitrate(string mp4FileName, int bitRateKb, string ffmepexe, TestFileHelper tfh)
+        {
+            var mp4FileNameH265 = tfh.GetTempFileName("mp4");
+            var r = new ChangeBitRateConversionResult { InputFile = mp4FileName };
+            var sb = new StringBuilder();
+            r.Mp4FileName = mp4FileNameH265;
+            sb.Append($@" -i ""{mp4FileName}""  -b {bitRateKb}k  ""{mp4FileNameH265}"" ");
+            r.FFMPEGCommandLine = sb.ToString();
+            var exitCode = 0;
+            var rr = ExecuteProgramUtilty.ExecProgram(ffmepexe, sb.ToString(), ref exitCode);
+            r.Success = rr && exitCode == 0;
+            r.Done();
+            if (r.Success)
+            {
+            }
+            else
+            {
+            }
+            Logger.Trace($"{r.ToJson()}", this);
+
+            return r;
+        }
+
+        public H265ConversionResult ConvertToH265(string mp4FileName, string ffmepexe, TestFileHelper tfh)
+        {
+            var mp4FileNameH265 = tfh.GetTempFileName("mp4");
+            var r = new H265ConversionResult { InputFile = mp4FileName };
+            var sb = new StringBuilder();
+            r.Mp4FileName = mp4FileNameH265;
+
+            sb.Append($@" -i ""{mp4FileName}"" -vcodec libx265 -crf 28 ""{mp4FileNameH265}"" ");
+
+            r.FFMPEGCommandLine = sb.ToString();
+            var exitCode = 0;
+            var rr = ExecuteProgramUtilty.ExecProgram(ffmepexe, sb.ToString(), ref exitCode);
+            r.Success = rr && exitCode == 0;
             r.Done();
 
             if (r.Success)

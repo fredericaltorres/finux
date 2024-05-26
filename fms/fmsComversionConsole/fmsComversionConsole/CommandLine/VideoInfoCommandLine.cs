@@ -2,7 +2,8 @@
 
 namespace fmsComversionConsole
 {
-    // videoInfo --videoFileName "C:\Users\ftorres\AppData\Local\Temp\s18070541.mp4"
+    // fmsComversionConsole.exe videoInfo --videoFileName "C:\Users\ftorres\Downloads\VictorHugoPresentation.mp4"
+    // fmsComversionConsole.exe videoInfo --videoFileName "c:\temp\VictorHugoPresentation.mp4"
     [Verb("videoInfo", HelpText = "videoInfo")]
     public class VideoInfoCommandLine : BaseCommandLine
     {

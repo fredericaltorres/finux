@@ -45,6 +45,23 @@ namespace fms
         }
     }
 
+    public class H265ConversionResult : ConversionResultBase
+    {
+        public string Mp4FileName { get; set; }
+
+        public H265ConversionResult() : base()
+        {
+        }
+    }
+    public class ChangeBitRateConversionResult : ConversionResultBase
+    {
+        public string Mp4FileName { get; set; }
+
+        public ChangeBitRateConversionResult() : base()
+        {
+        }
+    }
+
     public class HlsConversionResult : ConversionResultBase
     {
         public string fmsVideoId { get; set; }
