@@ -11,12 +11,11 @@ using System.IO;
 using fAI;
 using NReco.VideoInfo;
 using static NReco.VideoInfo.MediaInfo;
-using Newtonsoft.Json;
-using System.Diagnostics;
+using static fms.VideoManager;
 
 namespace fms
 {
-    public class VideoManager
+    public partial class VideoManager
     {
         public string _inputVideoFileNameOrUrl { get; }
         private MediaInfo _mediaInfo { get; set; }
@@ -51,41 +50,6 @@ namespace fms
             return sb.ToString();
         }
 
-        // 1280 x 720 pixels 720p
-        // 1920 × 1080 pixels 1080p
-
-        public class VideoResolution
-        {
-            public int Width { get; set; }
-            public int Height { get; set; }
-            public string Name { get; set; }
-            public int BitRateMegaBit { get; set; }
-            public int KeyFrame { get; set; } = 48;
-            public string Preset { get; set; } = "medium";
-            public int SegmentDurationSeconds { get; set; } = 6;
-
-            public string GetVideoMapCmd(int resolutionIndex)
-            {
-                return $@"-map ""[v{resolutionIndex}out]"" -c:v:0 libx264 -x264-params ""nal-hrd=cbr:force-cfr=1"" -b:v:0 {BitRateMegaBit}M -maxrate:v:0 {BitRateMegaBit}M -minrate:v:0 {BitRateMegaBit}M -bufsize:v:0 {BitRateMegaBit}M -preset ""{Preset}"" -g {KeyFrame} -sc_threshold 0 -keyint_min {KeyFrame} ";
-            }
-            public string GetScaleResolutionCmd(int resolutionIndex, bool isLast)
-            {
-                return $@"[v{resolutionIndex}]scale=w={Width}:h={Height}[v{resolutionIndex}out]{(isLast ? "":";")}";
-            }
-
-            public string GetAudioMapCmd(int resolutionIndex)
-            {
-                return $@"-map a:0 -c:a:{resolutionIndex} aac -b:a:{resolutionIndex} 128k -ac 2 ";
-            }
-
-            public string GetFFMPEGStreamMap(int resolutionIndex)
-            {
-                return $@"v:{resolutionIndex},a:{resolutionIndex} ";
-            }
-
-            public bool IsSquareResolution => Width == Height;
-        }
-
 
         public void FixPathInM3U8(string videoFolder, string search, string replacement)
         {
@@ -98,51 +62,9 @@ namespace fms
             }
         }
 
-        public static Dictionary<string, VideoResolution> VideoResolutions = new  Dictionary<string, VideoResolution>() 
-        {
-            ["1080p"]       = new VideoResolution() { Width = 1920, Height = 1080, Name = "1080p",      BitRateMegaBit = 5, Preset = "medium", KeyFrame = 48 },
-            ["1080x1080p"]  = new VideoResolution() { Width = 1080, Height = 1080, Name = "1080x1080p", BitRateMegaBit = 5, Preset = "medium", KeyFrame = 48 },
-            ["720p"]        = new VideoResolution() { Width = 1280, Height =  720, Name = "720p",       BitRateMegaBit = 1, Preset = "medium", KeyFrame = 48 },
-            ["720x720p"]    = new VideoResolution() { Width =  720, Height =  720, Name = "720x720p",   BitRateMegaBit = 1, Preset = "medium", KeyFrame = 48 },
-            ["480p"]        = new VideoResolution() { Width =  640, Height =  480, Name = "480p",       BitRateMegaBit = 1, Preset = "medium", KeyFrame = 48 },
-            ["480x480p"]    = new VideoResolution() { Width =  480, Height =  480, Name = "480x480p",   BitRateMegaBit = 1, Preset = "medium", KeyFrame = 48 },
-            ["320x240p"]    = new VideoResolution() { Width =  320, Height =  240, Name = "320x240p",   BitRateMegaBit = 1, Preset = "medium", KeyFrame = 48 },
-            ["240x240p"]    = new VideoResolution() { Width =  240, Height =  240, Name = "240x240p",   BitRateMegaBit = 1, Preset = "medium", KeyFrame = 48 },
-        };
-
-        public static List<string> VideoResolutionAvailable = VideoResolutions.Keys.ToList();
-
-        public class ConversionResult
-        {
-            public string InputVideo { get; set; }
-            public bool Success { get; set; }
-            public string fmsVideoId { get; set; }
-            public string LocalFolder { get; set; }
-            public List<VideoResolution> Resolutions { get; set; }
-            public string FFMPEGCommandLine { get; set; }
-            public string mu38MasterUrl { get; set;}
-            private Stopwatch _stopwatch { get; set; }
-
-            public int Duration => (int)(_stopwatch.ElapsedMilliseconds/1000);
-
-            public ConversionResult()
-            {
-                _stopwatch = Stopwatch.StartNew();
-            }
-
-            public void Done()
-            {
-                _stopwatch.Stop();
-            }
-
-            public string ToJson()
-            {
-                return JsonConvert.SerializeObject(this, Formatting.None);
-            }
-        }
 
         // https://www.youtube.com/watch?v=xJQBnrJXyv4 Download HLS Streaming Video with PowerShell and FFMPEG
-        public ConversionResult ConvertToHls(string hlsFolder, string ffmepexe, string azureStorageConnectionString, List<string> resolutionKeys, string cdnHost, string fmsVideoId = null)
+        public HlsConversionResult ConvertToHls(string hlsFolder, string ffmepexe, string azureStorageConnectionString, List<string> resolutionKeys, string cdnHost, string fmsVideoId = null)
         {
             if (string.IsNullOrEmpty(fmsVideoId))
                 fmsVideoId = Guid.NewGuid().ToString();
@@ -150,21 +72,23 @@ namespace fms
             var parentFolder = Path.Combine(hlsFolder, fmsVideoId);
             var videoFolder = Path.Combine(parentFolder, fmsVideoId);
             var resolutions = new List<VideoResolution>();
-            var c = new ConversionResult { InputVideo = _inputVideoFileNameOrUrl, fmsVideoId = fmsVideoId, LocalFolder = parentFolder, Resolutions = resolutions };
+            var c = new HlsConversionResult { InputFile = _inputVideoFileNameOrUrl, fmsVideoId = fmsVideoId, LocalFolder = parentFolder, Resolutions = resolutions };
 
-            Logger.Trace($"[CONVERSION] {DS.Dictionary(new { c.InputVideo, c.fmsVideoId }).Format(preFix: "", postFix: "")}", this);
+            Logger.Trace($"[CONVERSION] {DS.Dictionary(new { c.InputFile, c.fmsVideoId }).Format(preFix: "", postFix: "")}", this);
 
             Directory.CreateDirectory(parentFolder);
 
             foreach(var rk in resolutionKeys)
             {
-                if (VideoResolutions.ContainsKey(rk))
+                if (VideoResolution.VideoResolutions.ContainsKey(rk))
                 {
-                    var videoResolution = VideoResolutions[rk];
+                    var videoResolution = VideoResolution.VideoResolutions[rk];
                     if (this.Height >= videoResolution.Height)
                         resolutions.Add(videoResolution);
                 }
             }
+
+            Logger.Trace($"[RESOLUTIONS]{string.Join(", ", resolutions.Select(rso => rso.Name))}", this);
 
             var sb = new StringBuilder();
 
@@ -206,19 +130,15 @@ namespace fms
             sb.Append($@"-f hls -hls_time {hls_time} -hls_playlist_type vod ");
             sb.Append($@"-hls_flags independent_segments -hls_segment_type mpegts ");
             sb.Append($@"-hls_segment_filename ""{videoFolder}-%v/data%04d.ts"" -use_localtime_mkdir 1 ");
-
             sb.Append($@"-master_pl_name ""master.m3u8"" ");
-            
+
             sb.Append($@"-var_stream_map """); //sb.Append($@"-var_stream_map ""v:0,a:0 v:1,a:1"" ");
             for (var re = 0; re < resolutions.Count; re++)
                 sb.Append(resolutions[re].GetFFMPEGStreamMap(re));
             sb.Remove(sb.Length - 1, 1);
             sb.Append($@""" ");
-
             sb.Append($@" ""{videoFolder}-%v.m3u8"" ");
-
             Logger.Trace($"{sb}", this);
-
             c.FFMPEGCommandLine = sb.ToString();
 
             var exitCode = 0;
@@ -236,8 +156,8 @@ namespace fms
                 DirectoryService.DeleteDirectory(parentFolder);
             }
             Logger.Trace($"{c.ToJson()}", this);
-            Logger.Trace($"[SUMMARY] {DS.Dictionary(new { c.InputVideo, c.fmsVideoId, c.Duration, c.mu38MasterUrl }).Format(preFix:"", postFix:"")}", this);
-            Logger.Trace($@"[JAVASCRIPT] const cdn_url = ""{c.mu38MasterUrl}""; // {Path.GetFileName(c.InputVideo)}", this);
+            Logger.Trace($"[SUMMARY] {DS.Dictionary(new { c.InputFile, c.fmsVideoId, c.Duration, c.mu38MasterUrl }).Format(preFix:"", postFix:"")}", this);
+            Logger.Trace($@"[JAVASCRIPT] const cdn_url = ""{c.mu38MasterUrl}""; // {Path.GetFileName(c.InputFile)}", this);
 
             return c;
         }
@@ -301,6 +221,69 @@ namespace fms
                 }
             }
             return masterUrlFromCDN;
+        }
+
+        public GifToMp4ConversionResult ConvertGifToMp4(string mp4FileName, string ffmepexe)
+        {
+            using (var tfh = new TestFileHelper()) {
+
+                tfh.DeleteFile(mp4FileName);
+
+                var r = new GifToMp4ConversionResult { InputFile = this._inputVideoFileNameOrUrl };
+                var sb = new StringBuilder();
+                sb.Append($@"-i ""{this._inputVideoFileNameOrUrl}"" -movflags faststart -pix_fmt yuv420p -vf ""scale=trunc(iw/2)*2:trunc(ih/2)*2"" ""{mp4FileName}"" ");
+                r.FFMPEGCommandLine = sb.ToString();
+                var exitCode = 0;
+                var rr = ExecuteProgramUtilty.ExecProgram(ffmepexe, sb.ToString(), ref exitCode);
+                r.Success = rr && exitCode == 0;
+                r.Mp4FileName = mp4FileName;
+                r.Done();
+
+                if (r.Success)
+                {
+                    var r2 = AddBlankAudioTrack(mp4FileName, ffmepexe, tfh);
+                    if (r2.Success)
+                    {
+                        File.Copy(r2.Mp4FileName, mp4FileName, true);
+                    }
+                    else
+                    {
+                        r.Success = false;
+                    }
+                }
+                else
+                {
+                }
+                Logger.Trace($"{r.ToJson()}", this);
+
+                return r;
+            }
+        }
+
+
+        public AddAudioTrackResult AddBlankAudioTrack(string mp4FileName, string ffmepexe, TestFileHelper tfh)
+        {
+            var mp4FileNameWithAudio = tfh.GetTempFileName("mp4");
+            var r = new AddAudioTrackResult { InputFile = mp4FileName };
+            var sb = new StringBuilder();
+            r.Mp4FileName = mp4FileNameWithAudio;
+            sb.Append($@"-f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100 -i ""{mp4FileName}"" -c:v copy -c:a aac -shortest ""{mp4FileNameWithAudio}"" ");
+            r.FFMPEGCommandLine = sb.ToString();
+            var exitCode = 0;
+            var rr = ExecuteProgramUtilty.ExecProgram(ffmepexe, sb.ToString(), ref exitCode);
+            r.Success = rr && exitCode == 0;
+            r.Mp4FileName = mp4FileName;
+            r.Done();
+
+            if (r.Success)
+            {
+            }
+            else
+            {
+            }
+            Logger.Trace($"{r.ToJson()}", this);
+
+            return r;
         }
     }
 }

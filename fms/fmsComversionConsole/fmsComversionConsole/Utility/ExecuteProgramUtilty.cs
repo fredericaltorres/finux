@@ -1,4 +1,5 @@
-﻿using System;
+﻿using fAI;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -29,6 +30,7 @@ namespace fms
 
         public static ExecProgramResponse ExecProgram(string program, string parameters, ref int intExitCode, bool sameProcess, bool booHidden, Action notifyCaller = null, int sleepTime = 2, bool captureOutput = false)
         {
+            Logger.Trace($"{program} {parameters}");
             var capturedOutput = new StringBuilder();
             var r = new ExecProgramResponse();
             try
