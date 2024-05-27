@@ -158,7 +158,6 @@ namespace fms
             sb.Remove(sb.Length - 1, 1);
             sb.Append($@""" ");
             sb.Append($@" ""{videoFolder}-%v.m3u8"" ");
-            Logger.Trace($"{sb}", this);
             c.FFMPEGCommandLine = sb.ToString();
 
             var exitCode = 0;
@@ -183,7 +182,6 @@ namespace fms
             Logger.Trace($@"[JAVASCRIPT] const cdn_url = ""{c.mu38MasterUrl}""; // {Path.GetFileName(c.InputFile)}", this);
             Logger.Trace($@"mu38MasterUrl: ({c.mu38MasterUrl})", this);
             Logger.Trace($@"ThumbnailUrl: ({c.ThumbnailUrl})", this);
-            Logger.Trace($@"*.ts files size: {tsFileSize/1024/1024} MB", this);
 
             return c;
         }

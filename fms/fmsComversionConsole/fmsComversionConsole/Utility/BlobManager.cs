@@ -207,11 +207,11 @@ namespace fms
             blobName = blobName.Replace("\\", "/");
             var container = blobServiceClient.GetBlobContainerClient(containerName);
             if (!container.Exists())
-                throw new ArgumentException($"Container {container} does not exist.");
+                throw new ArgumentException($"Container {container} not found");
 
             var blob = container.GetBlobClient(blobName);
             if (!blob.Exists())
-                throw new ArgumentException($"Blob {blobName} does not exist.");
+                throw new ArgumentException($"Blob {blobName} not found");
 
             return blob;
         }
@@ -255,8 +255,6 @@ namespace fms
                 if(waitAfterDeletion)
                     await Task.Delay(waitTime * 1000);
             }
-            else
-                Console.WriteLine($"Container '{containerName}' does not exist.");
         }
     }
 }
