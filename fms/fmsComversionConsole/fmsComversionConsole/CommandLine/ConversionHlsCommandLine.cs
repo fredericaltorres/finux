@@ -21,6 +21,10 @@ namespace fmsComversionConsole
      fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\EmbeddingVectorDBSimilaritySearch\EmbeddingVectorDBSimilaritySearch\MASTER\EmbeddingVectorDBSimilaritySearch\EmbeddingVectorDBSimilaritySearch.mp4"
      fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "https://fredcloud.blob.core.windows.net/public/sirosVariri.05.Video.FULL.mp4"
      fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\And Your Bird Can Sing.Video\And Your Bird Can Sing.Video\MASTER\And Your Bird Can Sing.Video\And Your Bird Can Sing.Video.mp4"
+     fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\I Want You.Video\master\I Want You.Video\I Want You.Video.mp4"
+     fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\EmbeddingVectorDBSimilaritySearch.JavaScript\EmbeddingVectorDBSimilaritySearch.JavaScript\MASTER\EmbeddingVectorDBSimilaritySearch.JavaScript\EmbeddingVectorDBSimilaritySearch.JavaScript.mp4"
+
+    //
     */
     [Verb("convertToHls", HelpText = "convertToHls")]
     public class ConversionHlsCommandLine : BaseCommandLine

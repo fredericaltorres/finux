@@ -77,6 +77,8 @@ namespace fms
         // https://www.youtube.com/watch?v=xJQBnrJXyv4 Download HLS Streaming Video with PowerShell and FFMPEG
         public HlsConversionResult ConvertToHls(string hlsFolder, string ffmepexe, string azureStorageConnectionString, List<string> resolutionKeys, string cdnHost, string fmsVideoId = null, bool? deriveFmsVideoId = null)
         {
+            Logger.Trace($"[CONVERSION] Start - {this.GetVideoInfo()}");
+
             if (string.IsNullOrEmpty(fmsVideoId))
                 fmsVideoId = Guid.NewGuid().ToString();
 
@@ -174,7 +176,7 @@ namespace fms
             }
             else 
             {
-                DirectoryService.DeleteDirectory(parentFolder);
+                DirectoryFileService.DeleteDirectory(parentFolder);
             }
             Logger.Trace($"{c.ToJson()}", this);
             Logger.Trace($"[SUMMARY] {DS.Dictionary(new { c.InputFile, c.fmsVideoId, c.Duration, c.mu38MasterUrl }).Format(preFix:"", postFix:"")}", this);
@@ -214,43 +216,11 @@ namespace fms
             return thumbnailFileName;
         }
 
-        private string GetContentType(string fileName)
+        private string TraceUploading(string fileName)
         {
-            var ext = Path.GetExtension(fileName).ToLower();
-            switch (ext)
-            {
-                case ".m3u8": return "application/vnd.apple.mpegurl";//"application/x-mpegURL";
-                case ".ts"  : return "video/MP2T";
-                default     : return "application/octet-stream";
-            }
-        }
-
-        private static string ReplaceHostInUri(string originalUrl, string newHost)
-        {
-            Uri originalUri = new Uri(originalUrl);
-            UriBuilder builder = new UriBuilder(originalUri);
-            builder.Host = newHost;
-            Uri newUri = builder.Uri;
-            return newUri.ToString();
-        }
-
-        private static string RemoveQueryStringFromUri(string originalUrl)
-        {
-            Uri originalUri = new Uri(originalUrl);
-            UriBuilder builder = new UriBuilder(originalUri);
-            builder.Query = string.Empty;
-            Uri newUri = builder.Uri;
-            return newUri.ToString();
-        }
-
-
-        public string DownloadFile(string url)
-        {
-            var fileName = Path.GetFileName(url);
-            var localFileName = new TestFileHelper().GetTempFileName(fileName);
-            var wc = new System.Net.WebClient();
-            wc.DownloadFile(url, localFileName);
-            return localFileName;
+            var fileSize = new FileInfo(fileName).Length;
+            Logger.Trace($"Uploading to Azure: {fileName} - {fileSize/1024} KB", this);
+            return fileName;
         }
 
         private (string, string, long) UploadToAzureStorage(string orginalVideo, string thumbnailLocalFile, string parentFolder, string fmsVideoId, string azureStorageConnectionString, string cdnHost)
@@ -267,34 +237,34 @@ namespace fms
             var orginalVideoBlobName = Path.GetFileName(orginalVideo);
             if (IsUrl(orginalVideo))
             {
-                var localorginalVideo = DownloadFile(orginalVideo);
-                bm.UploadBlobStreamAsync(containerName, orginalVideoBlobName, File.OpenRead(localorginalVideo), GetContentType(localorginalVideo)).GetAwaiter().GetResult();
+                var localorginalVideo = DirectoryFileService.DownloadFile(orginalVideo);
+                bm.UploadBlobStreamAsync(containerName, orginalVideoBlobName, File.OpenRead(TraceUploading(localorginalVideo)), DirectoryFileService.GetContentType(localorginalVideo)).GetAwaiter().GetResult();
             }
             else
             {
-                bm.UploadBlobStreamAsync(containerName, orginalVideoBlobName, File.OpenRead(orginalVideo), GetContentType(orginalVideo)).GetAwaiter().GetResult();
+                bm.UploadBlobStreamAsync(containerName, orginalVideoBlobName, File.OpenRead(TraceUploading(orginalVideo)), DirectoryFileService.GetContentType(orginalVideo)).GetAwaiter().GetResult();
             }
 
             // Upload the thumbnail
-            bm.UploadBlobStreamAsync(containerName, thumbnailBlobName, File.OpenRead(thumbnailLocalFile), GetContentType(orginalVideo)).GetAwaiter().GetResult();
+            bm.UploadBlobStreamAsync(containerName, thumbnailBlobName, File.OpenRead(TraceUploading(thumbnailLocalFile)), DirectoryFileService.GetContentType(orginalVideo)).GetAwaiter().GetResult();
 
             // Upload the m3u8 files
             var files = Directory.GetFiles(parentFolder, "*.m3u8").ToList();
             foreach (var f in files)
             {
                 var blobName = Path.GetFileName(f);
-                bm.UploadBlobStreamAsync(containerName, blobName, File.OpenRead(f), GetContentType(f)).GetAwaiter().GetResult();
+                bm.UploadBlobStreamAsync(containerName, blobName, File.OpenRead(TraceUploading(f)), DirectoryFileService.GetContentType(f)).GetAwaiter().GetResult();
             }
 
             // Get the URL for the thumbnail
             var thumbnailUrl = bm.GetBlobURL(containerName, thumbnailBlobName).ToString();
-            var thumbnailUrlFromCDN = ReplaceHostInUri(thumbnailUrl, cdnHost);
-            thumbnailUrl = RemoveQueryStringFromUri(thumbnailUrl);
+            var thumbnailUrlFromCDN = DirectoryFileService.ReplaceHostInUri(thumbnailUrl, cdnHost);
+            thumbnailUrl = DirectoryFileService.RemoveQueryStringFromUri(thumbnailUrl);
 
             // get the URL for the master.m3u8
             var masterUrlDirectFromStorage = bm.GetBlobURL(containerName, "master.m3u8").ToString();
-            var masterUrlFromCDN = ReplaceHostInUri(masterUrlDirectFromStorage, cdnHost);
-            masterUrlFromCDN = RemoveQueryStringFromUri(masterUrlFromCDN);
+            var masterUrlFromCDN = DirectoryFileService.ReplaceHostInUri(masterUrlDirectFromStorage, cdnHost);
+            masterUrlFromCDN = DirectoryFileService.RemoveQueryStringFromUri(masterUrlFromCDN);
 
             var resolutionFolders = files.Select(ff => Path.GetFileNameWithoutExtension(ff)).ToList().Filter(f => !f.Contains("master")).ToList();
 
@@ -307,7 +277,7 @@ namespace fms
                 {
                     tsFilesSize += new FileInfo(f).Length;
                     var blobName = Path.Combine(rf, Path.GetFileName(f));
-                    bm.UploadBlobStreamAsync(containerName, blobName, File.OpenRead(f), GetContentType(f)).GetAwaiter().GetResult();
+                    bm.UploadBlobStreamAsync(containerName, blobName, File.OpenRead(TraceUploading(f)), DirectoryFileService.GetContentType(f)).GetAwaiter().GetResult();
                 }
             }
             return (masterUrlFromCDN, thumbnailUrlFromCDN, tsFilesSize);

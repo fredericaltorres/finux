@@ -24,7 +24,7 @@ namespace fms
         public HlsManager(string hlsMasterM3U8Url)
         {
             this._hlsMasterM3U8Url = hlsMasterM3U8Url;
-            DirectoryService.DeleteFile(m3u8MasterFile);
+            DirectoryFileService.DeleteFile(m3u8MasterFile);
             this.DownloadHlsFile(this._hlsMasterM3U8Url, this.m3u8MasterFile);
             this.Analyse();
         }
@@ -116,7 +116,7 @@ namespace fms
 
         public string DownloadHlsFile(string hlsM3U8Url, string m3u8OutputFile)
         {
-            DirectoryService.DeleteFile(m3u8OutputFile);
+            DirectoryFileService.DeleteFile(m3u8OutputFile);
             var text = _client.DownloadString(hlsM3U8Url);
             File.AppendAllText(m3u8OutputFile, text);
             return m3u8OutputFile;
