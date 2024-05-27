@@ -77,6 +77,7 @@ namespace fms
         // https://www.youtube.com/watch?v=xJQBnrJXyv4 Download HLS Streaming Video with PowerShell and FFMPEG
         public HlsConversionResult ConvertToHls(string hlsFolder, string ffmepexe, string azureStorageConnectionString, List<string> resolutionKeys, string cdnHost, string fmsVideoId = null, bool? deriveFmsVideoId = null)
         {
+            Logger.Trace($"");
             Logger.Trace($"[CONVERSION] Start - {this.GetVideoInfo()}");
 
             if (string.IsNullOrEmpty(fmsVideoId))
@@ -171,15 +172,14 @@ namespace fms
             {
                 FixPathInM3U8(parentFolder, videoFolder, fmsVideoId);
                 var thumbnailLocalFile = GetVideoThumbnail(this._inputVideoFileNameOrUrl);
-                (c.mu38MasterUrl, c.ThumbnailUrl, tsFileSize) = UploadToAzureStorage(this._inputVideoFileNameOrUrl, thumbnailLocalFile, parentFolder, fmsVideoId, azureStorageConnectionString, cdnHost);
-                
+                (c.mu38MasterUrl, c.ThumbnailUrl, c.TsFileSize) = UploadToAzureStorage(this._inputVideoFileNameOrUrl, thumbnailLocalFile, parentFolder, fmsVideoId, azureStorageConnectionString, cdnHost);
             }
             else 
             {
                 DirectoryFileService.DeleteDirectory(parentFolder);
             }
-            Logger.Trace($"{c.ToJson()}", this);
-            Logger.Trace($"[SUMMARY] {DS.Dictionary(new { c.InputFile, c.fmsVideoId, c.Duration, c.mu38MasterUrl }).Format(preFix:"", postFix:"")}", this);
+            
+            Logger.Trace($"[SUMMARY] {c.ToJson()}", this);
             Logger.Trace($@"[JAVASCRIPT] const cdn_url = ""{c.mu38MasterUrl}""; // {Path.GetFileName(c.InputFile)}", this);
             Logger.Trace($@"mu38MasterUrl: (""{c.mu38MasterUrl}"")", this);
             Logger.Trace($@"ThumbnailUrl: (""{c.ThumbnailUrl}"")", this);

@@ -69,6 +69,11 @@ namespace fms
         public List<VideoResolution> Resolutions { get; set; }
         public string mu38MasterUrl { get; set;}
         public string ThumbnailUrl { get; set; }
+        public long TsFileSize { get; set; }
+
+        public long TsFileSizeKb => TsFileSize / 1024;
+        public long TsFileSizeMb => TsFileSize / 1024 / 1024;
+
 
         public HlsConversionResult() : base()
         {
