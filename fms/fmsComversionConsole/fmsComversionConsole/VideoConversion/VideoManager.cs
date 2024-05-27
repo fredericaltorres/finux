@@ -181,8 +181,8 @@ namespace fms
             
             Logger.Trace($"[SUMMARY] {c.ToJson()}", this);
             Logger.Trace($@"[JAVASCRIPT] const cdn_url = ""{c.mu38MasterUrl}""; // {Path.GetFileName(c.InputFile)}", this);
-            Logger.Trace($@"mu38MasterUrl: (""{c.mu38MasterUrl}"")", this);
-            Logger.Trace($@"ThumbnailUrl: (""{c.ThumbnailUrl}"")", this);
+            Logger.Trace($@"mu38MasterUrl: ({c.mu38MasterUrl})", this);
+            Logger.Trace($@"ThumbnailUrl: ({c.ThumbnailUrl})", this);
             Logger.Trace($@"*.ts files size: {tsFileSize/1024/1024} MB", this);
 
             return c;
@@ -258,13 +258,11 @@ namespace fms
 
             // Get the URL for the thumbnail
             var thumbnailUrl = bm.GetBlobURL(containerName, thumbnailBlobName).ToString();
-            var thumbnailUrlFromCDN = DirectoryFileService.ReplaceHostInUri(thumbnailUrl, cdnHost);
-            thumbnailUrl = DirectoryFileService.RemoveQueryStringFromUri(thumbnailUrl);
+            var thumbnailUrlFromCDN = DirectoryFileService.RemoveQueryStringFromUri(DirectoryFileService.ReplaceHostInUri(thumbnailUrl, cdnHost));
 
             // get the URL for the master.m3u8
             var masterUrlDirectFromStorage = bm.GetBlobURL(containerName, "master.m3u8").ToString();
-            var masterUrlFromCDN = DirectoryFileService.ReplaceHostInUri(masterUrlDirectFromStorage, cdnHost);
-            masterUrlFromCDN = DirectoryFileService.RemoveQueryStringFromUri(masterUrlFromCDN);
+            var masterUrlFromCDN = DirectoryFileService.RemoveQueryStringFromUri(DirectoryFileService.ReplaceHostInUri(masterUrlDirectFromStorage, cdnHost));
 
             var resolutionFolders = files.Select(ff => Path.GetFileNameWithoutExtension(ff)).ToList().Filter(f => !f.Contains("master")).ToList();
 
