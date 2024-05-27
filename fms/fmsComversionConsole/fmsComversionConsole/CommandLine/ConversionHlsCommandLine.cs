@@ -13,15 +13,15 @@ namespace fmsComversionConsole
 {
 
     // convertToHls --videoFileName "C:\Users\ftorres\AppData\Local\Temp\s18070541.mp4" --fmsVideoId "webm-2-mp4" --resolutions "1080p,720p,480p"
+    // convertToHls --videoFileName "C:\brainshark\Fred.DTA.VDO\FredTrioProJazz.SMALL.mp4" --fmsVideoId "fred-trio-pro-jazz-small" --resolutions "1080p,720p,480p"
 
-    // convertToHls --videoFileName "C:\Users\ftorres\Downloads\Translating a PowerPoint from English To French with C# and ChatGPT Web Api.mp4" --resolutions "1080p,720p,480p"
-    // convertToHls --videoFileName "C:\\Fred.DTA.VDO\FredTrioProJazz.SMALL.mp4" --fmsVideoId "fred-trio-pro-jazz-small" --resolutions "1080p,720p,480p"
-    // convertToHls --videoFileName "C:\VIDEO\ChatGPT4.GenerateMultiChoiceQuestion\ChatGPT4.GenerateMultiChoiceQuestion\MASTER\ChatGPT4.GenerateMultiChoiceQuestion\ChatGPT4.GenerateMultiChoiceQuestion.mp4"
-    // convertToHls --videoFileName "C:\VIDEO\ChatGPT4.QuestionFacts\ChatGPT4.QuestionFacts\MASTER\ChatGPT4.QuestionFacts\ChatGPT4.QuestionFacts.mp4"
-    // convertToHls --videoFileName "C:\VIDEO\EmbeddingVectorDBSimilaritySearch.JavaScript\EmbeddingVectorDBSimilaritySearch.JavaScript\MASTER\EmbeddingVectorDBSimilaritySearch.JavaScript\EmbeddingVectorDBSimilaritySearch.JavaScript.mp4"
-    // convertToHls --videoFileName "C:\VIDEO\EmbeddingVectorDBSimilaritySearch\EmbeddingVectorDBSimilaritySearch\MASTER\EmbeddingVectorDBSimilaritySearch\EmbeddingVectorDBSimilaritySearch.mp4"
-    // convertToHls --videoFileName "https://fredcloud.blob.core.windows.net/public/sirosVariri.05.Video.FULL.mp4"
-    // convertToHls --videoFileName "https://fredcloud.blob.core.windows.net/public/sirosVariri.05.Video.FULL.mp4"
+    // convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\Users\ftorres\Downloads\Translating a PowerPoint from English To French with C# and ChatGPT Web Api.mp4"
+    // convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\ChatGPT4.GenerateMultiChoiceQuestion\ChatGPT4.GenerateMultiChoiceQuestion\MASTER\ChatGPT4.GenerateMultiChoiceQuestion\ChatGPT4.GenerateMultiChoiceQuestion.mp4"
+    // convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\ChatGPT4.QuestionFacts\ChatGPT4.QuestionFacts\MASTER\ChatGPT4.QuestionFacts\ChatGPT4.QuestionFacts.mp4"
+    // convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\EmbeddingVectorDBSimilaritySearch.JavaScript\EmbeddingVectorDBSimilaritySearch.JavaScript\MASTER\EmbeddingVectorDBSimilaritySearch.JavaScript\EmbeddingVectorDBSimilaritySearch.JavaScript.mp4"
+    // convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\EmbeddingVectorDBSimilaritySearch\EmbeddingVectorDBSimilaritySearch\MASTER\EmbeddingVectorDBSimilaritySearch\EmbeddingVectorDBSimilaritySearch.mp4"
+    // convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "https://fredcloud.blob.core.windows.net/public/sirosVariri.05.Video.FULL.mp4"
+
     [Verb("convertToHls", HelpText = "convertToHls")]
     public class ConversionHlsCommandLine : BaseCommandLine
     {
@@ -37,6 +37,9 @@ namespace fmsComversionConsole
 
         [CommandLine.Option('f', "fmsVideoId", Required = false, HelpText = "fmsVideoId")]
         public string fmsVideoId { get; set; } = "";
+
+        [CommandLine.Option('f', "deriveFmsVideoId", Required = false, HelpText = "deriveFmsVideoId")]
+        public bool DeriveFmsVideoId { get; set; } = false;
 
         public List<string> ResolutionList { get { return this.Resolutions.Split(DS.List(",").ToArray(), StringSplitOptions.RemoveEmptyEntries).ToList();  } }
     }

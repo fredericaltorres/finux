@@ -68,6 +68,7 @@ namespace fms
         public string LocalFolder { get; set; }
         public List<VideoResolution> Resolutions { get; set; }
         public string mu38MasterUrl { get; set;}
+        public string ThumbnailUrl { get; set; }
 
         public HlsConversionResult() : base()
         {
