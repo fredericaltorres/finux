@@ -11,17 +11,17 @@ using M3U8Parser.Attributes;
 
 namespace fmsComversionConsole
 {
+    /*
+     convertToHls --videoFileName "C:\Users\ftorres\AppData\Local\Temp\s18070541.mp4" --fmsVideoId "webm-2-mp4" --resolutions "1080p,720p,480p"
 
-    // convertToHls --videoFileName "C:\Users\ftorres\AppData\Local\Temp\s18070541.mp4" --fmsVideoId "webm-2-mp4" --resolutions "1080p,720p,480p"
-    // convertToHls --videoFileName "C:\brainshark\Fred.DTA.VDO\FredTrioProJazz.SMALL.mp4" --fmsVideoId "fred-trio-pro-jazz-small" --resolutions "1080p,720p,480p"
-
-    // convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\Users\ftorres\Downloads\Translating a PowerPoint from English To French with C# and ChatGPT Web Api.mp4"
-    // convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\ChatGPT4.GenerateMultiChoiceQuestion\ChatGPT4.GenerateMultiChoiceQuestion\MASTER\ChatGPT4.GenerateMultiChoiceQuestion\ChatGPT4.GenerateMultiChoiceQuestion.mp4"
-    // convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\ChatGPT4.QuestionFacts\ChatGPT4.QuestionFacts\MASTER\ChatGPT4.QuestionFacts\ChatGPT4.QuestionFacts.mp4"
-    // convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\EmbeddingVectorDBSimilaritySearch.JavaScript\EmbeddingVectorDBSimilaritySearch.JavaScript\MASTER\EmbeddingVectorDBSimilaritySearch.JavaScript\EmbeddingVectorDBSimilaritySearch.JavaScript.mp4"
-    // convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\EmbeddingVectorDBSimilaritySearch\EmbeddingVectorDBSimilaritySearch\MASTER\EmbeddingVectorDBSimilaritySearch\EmbeddingVectorDBSimilaritySearch.mp4"
-    // convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "https://fredcloud.blob.core.windows.net/public/sirosVariri.05.Video.FULL.mp4"
-
+     fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\Fred.TranslatingPowerPointWithGPTApi\Fred.TranslatingPowerPointWithGPTApi\MASTER\Fred.TranslatingPowerPointWithGPTApi\Fred.TranslatingPowerPointWithGPTApi.mp4"
+     fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\ChatGPT4.GenerateMultiChoiceQuestion\ChatGPT4.GenerateMultiChoiceQuestion\MASTER\ChatGPT4.GenerateMultiChoiceQuestion\ChatGPT4.GenerateMultiChoiceQuestion.mp4"
+     fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\ChatGPT4.QuestionFacts\ChatGPT4.QuestionFacts\MASTER\ChatGPT4.QuestionFacts\ChatGPT4.QuestionFacts.mp4"
+     fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\EmbeddingVectorDBSimilaritySearch.JavaScript\EmbeddingVectorDBSimilaritySearch.JavaScript\MASTER\EmbeddingVectorDBSimilaritySearch.JavaScript\EmbeddingVectorDBSimilaritySearch.JavaScript.mp4"
+     fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\EmbeddingVectorDBSimilaritySearch\EmbeddingVectorDBSimilaritySearch\MASTER\EmbeddingVectorDBSimilaritySearch\EmbeddingVectorDBSimilaritySearch.mp4"
+     fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "https://fredcloud.blob.core.windows.net/public/sirosVariri.05.Video.FULL.mp4"
+     fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\And Your Bird Can Sing.Video\And Your Bird Can Sing.Video\MASTER\And Your Bird Can Sing.Video\And Your Bird Can Sing.Video.mp4"
+    */
     [Verb("convertToHls", HelpText = "convertToHls")]
     public class ConversionHlsCommandLine : BaseCommandLine
     {

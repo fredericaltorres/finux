@@ -37,13 +37,21 @@ namespace fms
             
         }
 
+        public bool IsUrl(string url)
+        {
+            return  (!string.IsNullOrEmpty(url)) && (url.TrimStart().StartsWith("http://") || url.TrimStart().StartsWith("https://"));
+        }
+
         // https://www.nrecosite.com/video_info_net.aspx
         public string GetVideoInfo()
         {
             var sb = new StringBuilder();
             sb.Append($"file: {this._inputVideoFileNameOrUrl}").AppendLine();
 
-            var fileSize = new FileInfo(this._inputVideoFileNameOrUrl).Length;
+            var fileSize = -1L;
+            if(!IsUrl(this._inputVideoFileNameOrUrl))
+                fileSize = new FileInfo(this._inputVideoFileNameOrUrl).Length;
+
             var v = _mediaInfo;
             sb.Append(DS.Dictionary(new { fileSize, v.FormatName, v.Duration, StreamsCount = v.Streams.ToList().Count }).Format()).AppendLine();
 
@@ -155,11 +163,13 @@ namespace fms
 
             c.Success = r && exitCode == 0;
 
+            var tsFileSize = 0L;
+
             if (c.Success)
             {
                 FixPathInM3U8(parentFolder, videoFolder, fmsVideoId);
                 var thumbnailLocalFile = GetVideoThumbnail(this._inputVideoFileNameOrUrl);
-                (c.mu38MasterUrl, c.ThumbnailUrl) = UploadToAzureStorage(this._inputVideoFileNameOrUrl, thumbnailLocalFile, parentFolder, fmsVideoId, azureStorageConnectionString, cdnHost);
+                (c.mu38MasterUrl, c.ThumbnailUrl, tsFileSize) = UploadToAzureStorage(this._inputVideoFileNameOrUrl, thumbnailLocalFile, parentFolder, fmsVideoId, azureStorageConnectionString, cdnHost);
                 
             }
             else 
@@ -169,8 +179,9 @@ namespace fms
             Logger.Trace($"{c.ToJson()}", this);
             Logger.Trace($"[SUMMARY] {DS.Dictionary(new { c.InputFile, c.fmsVideoId, c.Duration, c.mu38MasterUrl }).Format(preFix:"", postFix:"")}", this);
             Logger.Trace($@"[JAVASCRIPT] const cdn_url = ""{c.mu38MasterUrl}""; // {Path.GetFileName(c.InputFile)}", this);
-            Logger.Trace($@"mu38MasterUrl (""{c.mu38MasterUrl}"")", this);
-            Logger.Trace($@"ThumbnailUrl (""{c.ThumbnailUrl}"")", this);
+            Logger.Trace($@"mu38MasterUrl: (""{c.mu38MasterUrl}"")", this);
+            Logger.Trace($@"ThumbnailUrl: (""{c.ThumbnailUrl}"")", this);
+            Logger.Trace($@"*.ts files size: {tsFileSize/1024/1024} MB", this);
 
             return c;
         }
@@ -232,20 +243,42 @@ namespace fms
             return newUri.ToString();
         }
 
-        private (string, string ) UploadToAzureStorage(string orginalVideo, string thumbnailLocalFile, string parentFolder, string fmsVideoId, string azureStorageConnectionString, string cdnHost)
+
+        public string DownloadFile(string url)
+        {
+            var fileName = Path.GetFileName(url);
+            var localFileName = new TestFileHelper().GetTempFileName(fileName);
+            var wc = new System.Net.WebClient();
+            wc.DownloadFile(url, localFileName);
+            return localFileName;
+        }
+
+        private (string, string, long) UploadToAzureStorage(string orginalVideo, string thumbnailLocalFile, string parentFolder, string fmsVideoId, string azureStorageConnectionString, string cdnHost)
         {
             var thumbnailBlobName = "thumbnail.jpg";
             Logger.Trace($"Uploading to Azure fmsVideoId:{fmsVideoId}", this);
             var containerName = fmsVideoId;
             var r = string.Empty;
             var bm = new BlobManager(azureStorageConnectionString);
+            bm.DeleteBlobContainer(fmsVideoId, waitAfterDeletion: true).GetAwaiter().GetResult();
             bm.CreateBlobContainer(fmsVideoId).GetAwaiter().GetResult();
 
-            // Upload the original video
+            // Upload the original video as url or as local file
             var orginalVideoBlobName = Path.GetFileName(orginalVideo);
-            bm.UploadBlobStreamAsync(containerName, orginalVideoBlobName, File.OpenRead(orginalVideo), GetContentType(orginalVideo)).GetAwaiter().GetResult();
+            if (IsUrl(orginalVideo))
+            {
+                var localorginalVideo = DownloadFile(orginalVideo);
+                bm.UploadBlobStreamAsync(containerName, orginalVideoBlobName, File.OpenRead(localorginalVideo), GetContentType(localorginalVideo)).GetAwaiter().GetResult();
+            }
+            else
+            {
+                bm.UploadBlobStreamAsync(containerName, orginalVideoBlobName, File.OpenRead(orginalVideo), GetContentType(orginalVideo)).GetAwaiter().GetResult();
+            }
+
+            // Upload the thumbnail
             bm.UploadBlobStreamAsync(containerName, thumbnailBlobName, File.OpenRead(thumbnailLocalFile), GetContentType(orginalVideo)).GetAwaiter().GetResult();
 
+            // Upload the m3u8 files
             var files = Directory.GetFiles(parentFolder, "*.m3u8").ToList();
             foreach (var f in files)
             {
@@ -253,26 +286,31 @@ namespace fms
                 bm.UploadBlobStreamAsync(containerName, blobName, File.OpenRead(f), GetContentType(f)).GetAwaiter().GetResult();
             }
 
+            // Get the URL for the thumbnail
             var thumbnailUrl = bm.GetBlobURL(containerName, thumbnailBlobName).ToString();
             var thumbnailUrlFromCDN = ReplaceHostInUri(thumbnailUrl, cdnHost);
             thumbnailUrl = RemoveQueryStringFromUri(thumbnailUrl);
 
+            // get the URL for the master.m3u8
             var masterUrlDirectFromStorage = bm.GetBlobURL(containerName, "master.m3u8").ToString();
             var masterUrlFromCDN = ReplaceHostInUri(masterUrlDirectFromStorage, cdnHost);
             masterUrlFromCDN = RemoveQueryStringFromUri(masterUrlFromCDN);
 
             var resolutionFolders = files.Select(ff => Path.GetFileNameWithoutExtension(ff)).ToList().Filter(f => !f.Contains("master")).ToList();
 
+            var tsFilesSize = 0L;
+
             foreach(var rf in resolutionFolders)
             {
                 var filesInResolution = Directory.GetFiles(parentFolder, $"{rf}\\*.ts").ToList();
                 foreach (var f in filesInResolution)
                 {
+                    tsFilesSize += new FileInfo(f).Length;
                     var blobName = Path.Combine(rf, Path.GetFileName(f));
                     bm.UploadBlobStreamAsync(containerName, blobName, File.OpenRead(f), GetContentType(f)).GetAwaiter().GetResult();
                 }
             }
-            return (masterUrlFromCDN, thumbnailUrlFromCDN);
+            return (masterUrlFromCDN, thumbnailUrlFromCDN, tsFilesSize);
         }
 
         public GifToMp4ConversionResult ConvertGifToMp4(string mp4FileName, int bitRateKb, string ffmepexe)

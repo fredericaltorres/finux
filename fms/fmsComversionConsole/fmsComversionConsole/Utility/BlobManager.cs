@@ -239,12 +239,22 @@ namespace fms
             return count;
         }
 
-        public async   Task DeleteBlobContainer(string containerName)
+        public async Task<bool> BlobContainerExists(string containerName)
         {
             BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
 
+            return (await containerClient.ExistsAsync());
+        }
+
+        public async Task DeleteBlobContainer(string containerName, bool waitAfterDeletion, int waitTime = 10)
+        {
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
             if (await containerClient.ExistsAsync())
+            {
                 await containerClient.DeleteAsync();
+                if(waitAfterDeletion)
+                    await Task.Delay(waitTime * 1000);
+            }
             else
                 Console.WriteLine($"Container '{containerName}' does not exist.");
         }
