@@ -16,18 +16,26 @@ namespace fms
     {
         private static WebClient _client = new WebClient();
         private readonly string _hlsMasterM3U8Url;
-
+        private readonly string _hlsMasterM3U8QueryString;
         private MasterPlaylist _masterPlayList;
         
         public string m3u8MasterFile = Path.Combine(@"c:\temp", "master.m3u8");
 
         public List<string> m3u8PlayListUrls { get; set; } = new List<string>();
 
-        public HlsManager(string hlsMasterM3U8Url)
+        private string BuildUrlWithQueryString(string url)
+        {
+            if(string.IsNullOrEmpty(this._hlsMasterM3U8QueryString))
+                return url;
+            return $"{url}?{this._hlsMasterM3U8QueryString}";
+        }
+
+        public HlsManager(string hlsMasterM3U8Url, string hlsMasterM3U8QueryString = null)
         {
             this._hlsMasterM3U8Url = hlsMasterM3U8Url;
+            this._hlsMasterM3U8QueryString = hlsMasterM3U8QueryString;
             DirectoryFileService.DeleteFile(m3u8MasterFile);
-            this.DownloadHlsFile(this._hlsMasterM3U8Url, this.m3u8MasterFile);
+            this.DownloadHlsFile(BuildUrlWithQueryString(this._hlsMasterM3U8Url), this.m3u8MasterFile);
             this.LoadMasterM3U8();
         }
 
@@ -37,7 +45,7 @@ namespace fms
             var resolutionFileName = GetLastDirectory(m3u8PlayListUrl);
 
             var m3u8MResolutionFile = Path.Combine(outputFolder, resolutionFileName);
-            this.DownloadHlsFile(m3u8PlayListUrl, m3u8MResolutionFile);
+            this.DownloadHlsFile(BuildUrlWithQueryString(m3u8PlayListUrl), m3u8MResolutionFile);
 
             var m = M3U8Parser.MediaPlaylist.LoadFromFile(m3u8MResolutionFile);
             var mediaSegment = m.MediaSegments[0];
@@ -53,7 +61,7 @@ namespace fms
                 var localSegmentFileName = Path.Combine(subFolder, tsFileName);
                 var segmentUrl = $@"{hlsRootUrl}/{segment.Uri}";
 
-                this.DownloadHlsFile(segmentUrl, localSegmentFileName);
+                this.DownloadHlsFile(BuildUrlWithQueryString(segmentUrl), localSegmentFileName);
                 downloadInfo.TsUrlList.Add(segmentUrl);
             }
         }
@@ -140,7 +148,8 @@ namespace fms
         {
             var r = new DownloadInfo { m3u8MasterUrl = this._hlsMasterM3U8Url, m3u8PlayListUrls = this.m3u8PlayListUrls };
 
-            this.LoadMasterM3U8();
+            ///this.LoadMasterM3U8();
+
             r.fmsVideoId = GetVideoFmsVideoIdFromMasterUrl(this._hlsMasterM3U8Url);
             var text = _masterPlayList.ToString();
             var localFolder = r.LocalFolder = Path.Combine(outputFolder, r.fmsVideoId);

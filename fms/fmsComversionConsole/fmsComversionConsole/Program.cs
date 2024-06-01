@@ -37,7 +37,7 @@ namespace fmsComversionConsole
                       },
                       (DownloadHlsAssetsCommandLine options) =>
                       {
-                          var hlsM = new HlsManager(options.MasterM3U8Url);
+                          var hlsM = new HlsManager(options.MasterM3U8Url, options.QueryString);
 
                           Logger.Trace($"DownloadHlsAssets {options.MasterM3U8Url}", new { }, replaceCRLF: false);
 
