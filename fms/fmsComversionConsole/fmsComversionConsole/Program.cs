@@ -26,7 +26,7 @@ namespace fmsComversionConsole
             try
             {
                 var cmdParser = new Parser(config => config.HelpWriter = null);
-                var parsingTry = cmdParser.ParseArguments<ConversionHlsCommandLine, ConcatHlsCommandLine, VideoInfoCommandLine, ConversionGifToMp4CommandLine>(args);
+                var parsingTry = cmdParser.ParseArguments<ConversionHlsCommandLine, DownloadHlsAssetsCommandLine, VideoInfoCommandLine, ConversionGifToMp4CommandLine>(args);
                 var r = parsingTry.MapResult(
                       (ConversionHlsCommandLine options) =>
                       {
@@ -35,12 +35,17 @@ namespace fmsComversionConsole
                           var c = vc.ConvertToHls(options.HlsFolder, options.FFMPEG_EXE, options.FMS_AZURE_STORAGE_CONNECTION_STRING, options.ResolutionList, options.CDN_HOST, options.fmsVideoId, options.DeriveFmsVideoId);
                           return 0;
                       },
-                      (ConcatHlsCommandLine options) =>
+                      (DownloadHlsAssetsCommandLine options) =>
                       {
                           var hlsM = new HlsManager(options.MasterM3U8Url);
-                          var data = hlsM.GetMasterInfo();
-                          Logger.Trace($"{data}", new { }, replaceCRLF: false);
-                          Trace(data);
+
+                          Logger.Trace($"DownloadHlsAssets {options.MasterM3U8Url}", new { }, replaceCRLF: false);
+
+                          var downloadInfo = hlsM.DownloadHlsAssets(options.OutputFolder);
+                          Logger.Trace($"{downloadInfo.ToJSON()}", new { }, replaceCRLF: false);
+                          //var data = hlsM.GetMasterInfo();
+                          //Logger.Trace($"{data}", new { }, replaceCRLF: false);
+                          //Trace(data);
                           return 0;
                       },
                       (VideoInfoCommandLine options) =>

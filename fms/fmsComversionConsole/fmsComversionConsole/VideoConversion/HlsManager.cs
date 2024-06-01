@@ -7,6 +7,8 @@ using System.Text;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using M3U8Parser.Attributes;
+using M3U8Parser.ExtXType;
+using System;
 
 namespace fms
 {
@@ -19,15 +21,43 @@ namespace fms
         
         public string m3u8MasterFile = Path.Combine(@"c:\temp", "master.m3u8");
 
-        public List<string> ResolutionM3u8Urls { get; set; } = new List<string>();
+        public List<string> m3u8PlayListUrls { get; set; } = new List<string>();
 
         public HlsManager(string hlsMasterM3U8Url)
         {
             this._hlsMasterM3U8Url = hlsMasterM3U8Url;
             DirectoryFileService.DeleteFile(m3u8MasterFile);
             this.DownloadHlsFile(this._hlsMasterM3U8Url, this.m3u8MasterFile);
-            this.Analyse();
+            this.LoadMasterM3U8();
         }
+
+        public void DownloadM3U8ResolutionFiles(string m3u8PlayListUrl, int resolutionIndex, string outputFolder, DownloadInfo downloadInfo)
+        {
+            var hlsRootUrl = GetMasterRelativePath(m3u8PlayListUrl);
+            var resolutionFileName = GetLastDirectory(m3u8PlayListUrl);
+
+            var m3u8MResolutionFile = Path.Combine(outputFolder, resolutionFileName);
+            this.DownloadHlsFile(m3u8PlayListUrl, m3u8MResolutionFile);
+
+            var m = M3U8Parser.MediaPlaylist.LoadFromFile(m3u8MResolutionFile);
+            var mediaSegment = m.MediaSegments[0];
+
+            foreach (var segment in mediaSegment.Segments)
+            {
+                var subFolder = Path.GetDirectoryName(segment.Uri);
+                subFolder = Path.Combine(outputFolder, subFolder);
+                if(!Directory.Exists(subFolder))
+                    DirectoryFileService.CreateDirectory(subFolder);
+
+                var tsFileName = Path.GetFileName(segment.Uri);
+                var localSegmentFileName = Path.Combine(subFolder, tsFileName);
+                var segmentUrl = $@"{hlsRootUrl}/{segment.Uri}";
+
+                this.DownloadHlsFile(segmentUrl, localSegmentFileName);
+                downloadInfo.TsUrlList.Add(segmentUrl);
+            }
+        }
+
 
         public string GetResolutionM3u8Info(string m3u8ResolutionUrl, int resolutionIndex, StringBuilder sb)
         {
@@ -61,19 +91,71 @@ namespace fms
 
         private string GetMasterRelativePath(string url)
         {
+            // todo should extract the query string by using a Uri
             var x = url.LastIndexOf('/');
             return url.Substring(0, x);
         }
 
-        public void Analyse()
+        private string GetLastDirectory(string url)
         {
+            // todo should extract the query string by using a Uri
+            var x = url.LastIndexOf('/');
+            return url.Substring(x+1);
+        }
+
+        private string GetVideoFmsVideoIdFromMasterUrl(string url)
+        {
+            var p = GetMasterRelativePath(url);
+            var pp = GetLastDirectory(p);
+            return pp;
+        }
+
+        public void LoadMasterM3U8()
+        {
+            m3u8PlayListUrls.Clear();
             var hlsRootUrl = GetMasterRelativePath(this._hlsMasterM3U8Url);
             _masterPlayList = MasterPlaylist.LoadFromFile(this.m3u8MasterFile);
             
             foreach (var s in _masterPlayList.Streams)
             {
-                ResolutionM3u8Urls.Add($"{hlsRootUrl}\\{s.Uri}");
+                m3u8PlayListUrls.Add($"{hlsRootUrl}/{s.Uri}");
             }
+        }
+
+        public class DownloadInfo
+        {
+            public string LocalFolder { get; set; }
+            public string m3u8MasterUrl { get; set; }
+            public string fmsVideoId { get; set; }
+            public List<string> m3u8PlayListUrls { get; set; } = new List<string>();
+            public List<string> TsUrlList { get; set; } = new List<string>();
+
+            public string ToJSON()
+            {
+                return System.Text.Json.JsonSerializer.Serialize(this);
+            }
+        }
+
+        public DownloadInfo DownloadHlsAssets(string outputFolder)
+        {
+            var r = new DownloadInfo { m3u8MasterUrl = this._hlsMasterM3U8Url, m3u8PlayListUrls = this.m3u8PlayListUrls };
+
+            this.LoadMasterM3U8();
+            r.fmsVideoId = GetVideoFmsVideoIdFromMasterUrl(this._hlsMasterM3U8Url);
+            var text = _masterPlayList.ToString();
+            var localFolder = r.LocalFolder = Path.Combine(outputFolder, r.fmsVideoId);
+            DirectoryFileService.CreateDirectory(localFolder);
+
+            var localMasterFileName = Path.Combine(localFolder, "master.m3u8");
+            File.AppendAllText(localMasterFileName, text);
+
+            var resolutionIndex = 0;
+            foreach (var resolutionUrl in this.m3u8PlayListUrls)
+            {
+                DownloadM3U8ResolutionFiles(resolutionUrl, resolutionIndex, localFolder, r);
+                resolutionIndex++;
+            }
+            return r;
         }
 
         public string GetMasterInfo()
@@ -103,7 +185,7 @@ namespace fms
 
             sb.AppendLine();
             resolutionIndex = 0;
-            foreach (var resolution in ResolutionM3u8Urls)
+            foreach (var resolution in m3u8PlayListUrls)
             {
                 GetResolutionM3u8Info(resolution, resolutionIndex, sb);
                 resolutionIndex++;
@@ -112,13 +194,10 @@ namespace fms
             return sb.ToString();
         }
 
-        
-
         public string DownloadHlsFile(string hlsM3U8Url, string m3u8OutputFile)
         {
             DirectoryFileService.DeleteFile(m3u8OutputFile);
-            var text = _client.DownloadString(hlsM3U8Url);
-            File.AppendAllText(m3u8OutputFile, text);
+            _client.DownloadFile(hlsM3U8Url, m3u8OutputFile);
             return m3u8OutputFile;
         }
     }

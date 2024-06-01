@@ -24,6 +24,8 @@ namespace fmsComversionConsole
      fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\I Want You.Video\master\I Want You.Video\I Want You.Video.mp4"
      fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\EmbeddingVectorDBSimilaritySearch.JavaScript\EmbeddingVectorDBSimilaritySearch.JavaScript\MASTER\EmbeddingVectorDBSimilaritySearch.JavaScript\EmbeddingVectorDBSimilaritySearch.JavaScript.mp4"
 
+     fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,720p" --videoFileName "C:\VIDEO\I Want You.Video\master\I Want You.Video\I Want You.Video.mp4"
+
     //
     */
     [Verb("convertToHls", HelpText = "convertToHls")]

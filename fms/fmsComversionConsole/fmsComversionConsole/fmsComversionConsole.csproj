@@ -116,7 +116,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandLine\BaseCommandLine.cs" />
-    <Compile Include="CommandLine\ConcatHlsCommandLine.cs" />
+    <Compile Include="CommandLine\DownloadHlsAssetsCommandLine.cs" />
     <Compile Include="CommandLine\ConversionGifToMp4CommandLine.cs" />
     <Compile Include="CommandLine\ConversionHlsCommandLine.cs" />
     <Compile Include="CommandLine\VideoInfoCommandLine.cs" />

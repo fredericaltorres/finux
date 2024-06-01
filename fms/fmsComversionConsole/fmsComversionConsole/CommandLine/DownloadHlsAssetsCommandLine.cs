@@ -9,10 +9,10 @@ using CommandLine;
 namespace fmsComversionConsole
 {
 
-    // concatHls --masterM3U8Url "https://fvideostream.blob.core.windows.net/c0c9e315-527f-4568-87da-4b9156e01021/master.m3u8"
+    // downloadHlsAssets --masterM3U8Url "https://fvideostream.blob.core.windows.net/sirosvariri-05-video-full/master.m3u8" --outputfolder "C:\temp\stream\hls"
 
-    [Verb("concatHls", HelpText = "concatHls")]
-    public class ConcatHlsCommandLine : BaseCommandLine
+    [Verb("downloadHlsAssets", HelpText = "concatHls")]
+    public class DownloadHlsAssetsCommandLine : BaseCommandLine
     {
         [CommandLine.Option('m', "masterM3U8Url", Required = false, HelpText = "MasterM3U8Url")]
         public string MasterM3U8Url { get; set; }
