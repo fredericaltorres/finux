@@ -12,6 +12,7 @@ using System;
 using System.Linq;
 using Microsoft.Extensions.Azure;
 using fAI;
+using fmsComversionConsole.Utility;
 
 namespace fms
 {
@@ -75,6 +76,8 @@ namespace fms
             this.DownloadHlsFile(BuildUrlWithQueryString(m3u8PlayListUrl), m3u8MResolutionFile);
             var mediaPlayList = M3U8Parser.MediaPlaylist.LoadFromFile(m3u8MResolutionFile);
             var mediaSegment = mediaPlayList.MediaSegments[0];
+
+            downloadedVideoResolutionInfo.ResolutionFile = m3u8MResolutionFile;
 
             foreach (var segment in mediaSegment.Segments)
             {
@@ -156,38 +159,69 @@ namespace fms
         }
 
         // https://trac.ffmpeg.org/wiki/Concatenate
-        public DownloadedVideoInfo DownloadHlsAssets(string outputFolder, string fmsVideoId = null, bool concatTs = false)
+        public DownloadedVideoResult DownloadHlsAssets(string outputFolder, string fmsVideoId = null, bool concatTs = false, string ffmpegExe = null)
         {
-            var downloadInfoResult = new DownloadedVideoInfo { m3u8MasterUrl = this._hlsMasterM3U8Url };
-            downloadInfoResult.fmsVideoId = GetVideoFmsVideoIdFromMasterUrl(this._hlsMasterM3U8Url);
-            if(!string.IsNullOrEmpty(fmsVideoId))
-                downloadInfoResult.fmsVideoId = fmsVideoId;
-
-            var text = _masterPlayList.ToString();
-            var localFolder = downloadInfoResult.LocalFolder = Path.Combine(outputFolder, downloadInfoResult.fmsVideoId);
-            DirectoryFileService.CreateDirectory(localFolder);
-
-            var localMasterFileName = Path.Combine(localFolder, "master.m3u8");
-            File.AppendAllText(localMasterFileName, text);
-
-            var resolutionIndex = 0;
-            foreach (var resolutionUrl in this.m3u8PlayListUrls)
+            var downloadInfoResult = new DownloadedVideoResult { m3u8MasterUrl = this._hlsMasterM3U8Url };
+            try
             {
-                var streamInfo = _masterPlayList.Streams[resolutionIndex];
-                var dvr = new DownloadedVideoResolutionInfo { m3u8PlayListUrls = resolutionUrl, ResolutionDefinition = GetResolutionDefinition(streamInfo) };
-                downloadInfoResult.Resolutions.Add(dvr);
-                DownloadM3U8ResolutionFiles(resolutionUrl, resolutionIndex, localFolder, dvr);
-                resolutionIndex++;
+                downloadInfoResult.fmsVideoId = GetVideoFmsVideoIdFromMasterUrl(this._hlsMasterM3U8Url);
+                if (!string.IsNullOrEmpty(fmsVideoId))
+                    downloadInfoResult.fmsVideoId = fmsVideoId;
+
+                var text = _masterPlayList.ToString();
+                var localFolder = downloadInfoResult.LocalFolder = Path.Combine(outputFolder, downloadInfoResult.fmsVideoId);
+                DirectoryFileService.CreateDirectory(localFolder, deleteIfExists: true);
+
+                var localMasterFileName = Path.Combine(localFolder, "master.m3u8");
+                File.AppendAllText(localMasterFileName, text);
+
+                var resolutionIndex = 0;
+                foreach (var resolutionUrl in this.m3u8PlayListUrls)
+                {
+                    var streamInfo = _masterPlayList.Streams[resolutionIndex];
+                    var dvr = new DownloadedVideoResolutionInfo
+                    {
+                        m3u8PlayListUrls = resolutionUrl,
+                        ResolutionDefinition = GetResolutionDefinition(streamInfo)
+                    };
+                    downloadInfoResult.Resolutions.Add(dvr);
+                    DownloadM3U8ResolutionFiles(resolutionUrl, resolutionIndex, localFolder, dvr);
+                    resolutionIndex++;
+                }
+                if (concatTs)
+                {
+                    foreach (var resolution in downloadInfoResult.Resolutions)
+                    {
+                        var mp4SubFolder = Path.Combine(Path.GetDirectoryName(resolution.ResolutionFile), "mp4");
+                        DirectoryFileService.CreateDirectory(mp4SubFolder);
+                        var mp4FileNameOnly = Path.ChangeExtension(Path.GetFileName(resolution.ResolutionFile), ".mp4");
+                        var mp4FileName = Path.Combine(mp4SubFolder, mp4FileNameOnly);
+                        var concatFileName = resolution.ResolutionFile + ".files.txt";
+
+                        resolution.CreateFFMPEGConcatFile(concatFileName);
+                        var exitCode = FFMPEG.Concat(ffmpegExe, mp4FileName, concatFileName);
+                        DirectoryFileService.DeleteFile(concatFileName);
+
+                        if (exitCode != 0)
+                        {
+                            downloadInfoResult.SetException(new ApplicationException($"ffmpeg failed - exitCode:{exitCode}"), "DownloadHlsAssets");
+                            break;
+                        }
+                    }
+                    Logger.Trace($"Concat resolution {this.GetHighestResolutionDefinition()}");
+                    // https://trac.ffmpeg.org/wiki/Concatenate
+                }
             }
-            if(concatTs)
+            catch (Exception ex)
             {
-                Logger.Trace($"Concat resolution {this.GetHighestResolutionDefinition()}");
-                // https://trac.ffmpeg.org/wiki/Concatenate
+                downloadInfoResult.SetException(ex);
             }
             return downloadInfoResult;
         }
 
-        public string GetMasterInfo()
+      
+
+        public string GetMasterInfo()   
         {
             var hlsRootUrl = Path.GetDirectoryName(_hlsMasterM3U8Url);
             var sb = new StringBuilder();

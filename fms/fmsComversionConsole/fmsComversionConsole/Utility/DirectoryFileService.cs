@@ -67,11 +67,13 @@ namespace fms
                 throw new FileNotFoundException("File not found.", filePath);
         }
 
-        public static bool CreateDirectory(string directoryPath)
+        public static bool CreateDirectory(string directoryPath, bool deleteIfExists = false)
         {
             try
             {
-                DeleteDirectory(directoryPath);
+                if(deleteIfExists)
+                    DeleteDirectory(directoryPath);
+
                 Directory.CreateDirectory(directoryPath);
                 return true;
             }
