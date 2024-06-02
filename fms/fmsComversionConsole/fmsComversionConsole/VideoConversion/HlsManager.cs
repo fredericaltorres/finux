@@ -12,11 +12,10 @@ using System;
 using System.Linq;
 using Microsoft.Extensions.Azure;
 using fAI;
-using System.Text.Json.Serialization;
 
 namespace fms
 {
-    public class HlsManager
+    public partial class HlsManager
     {
         private static WebClient _client = new WebClient();
         private readonly string _hlsMasterM3U8Url;
@@ -156,41 +155,6 @@ namespace fms
             }
         }
 
-
-        public class TsFileInfo
-        {
-            public string Url { get; set; }
-            public string LocalFile { get; set; }
-            public long FileSize { get; set; }
-        }
-
-        public class DownloadedVideoResolutionInfo
-        {
-            public string m3u8PlayListUrls { get; set; }
-            public string ResolutionDefinition { get; set; }
-            public List<TsFileInfo> TsLocalFiles { get; set; } = new List<TsFileInfo>();
-
-            public string ToJSON()
-            {
-                return System.Text.Json.JsonSerializer.Serialize(this);
-            }
-        }
-
-        public class DownloadedVideoInfo
-        {
-            public string LocalFolder { get; set; }
-            public string m3u8MasterUrl { get; set; }
-            public string fmsVideoId { get; set; }
-            [JsonIgnore]
-            public StreamInf Stream { get; set; }
-            public List<DownloadedVideoResolutionInfo> Resolutions { get; set; } = new List<DownloadedVideoResolutionInfo>();
-
-            public string ToJSON()
-            {
-                return System.Text.Json.JsonSerializer.Serialize(this);
-            }
-        }
-
         // https://trac.ffmpeg.org/wiki/Concatenate
         public DownloadedVideoInfo DownloadHlsAssets(string outputFolder, string fmsVideoId = null, bool concatTs = false)
         {
@@ -261,9 +225,16 @@ namespace fms
 
         public string DownloadHlsFile(string hlsM3U8Url, string m3u8OutputFile)
         {
-            DirectoryFileService.DeleteFile(m3u8OutputFile);
-            _client.DownloadFile(hlsM3U8Url, m3u8OutputFile);
-            return m3u8OutputFile;
+            try
+            {
+                DirectoryFileService.DeleteFile(m3u8OutputFile);
+                _client.DownloadFile(hlsM3U8Url, m3u8OutputFile);
+                return m3u8OutputFile;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException($"DownloadHlsFile({hlsM3U8Url}, {m3u8OutputFile}) failed - {ex.Message}", ex);
+            }
         }
     }
 }

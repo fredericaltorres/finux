@@ -25,7 +25,7 @@ namespace fAI
 
         public static string TraceError(string message, object This = null, [CallerMemberName] string methodName = "")
         {
-            return Trace($"[ERROR]{message}", This, methodName);
+            return Trace($"[ERROR]{message}", This, methodName: methodName);
         }
 
         public static string Trace(string message, object This = null,  bool replaceCRLF = true, [CallerMemberName] string methodName = "")
@@ -52,7 +52,7 @@ namespace fAI
             return message;
         }
 
-        public static string Trace(Object poco, object This, [CallerMemberName] string methodName = "")
+        public static string TracePoco(Object poco, object This, [CallerMemberName] string methodName = "")
         {
             var d = ReflectionHelper.GetDictionary(poco);
             var sb = new System.Text.StringBuilder();
@@ -63,17 +63,13 @@ namespace fAI
             s = s.Replace(Environment.NewLine, "");
             s = s.Replace("\n", "");
             s = s.Replace("\r", "");
-            return Trace(s, This, methodName);
+            Console.WriteLine(s);
+            return Trace(s, This, methodName: methodName);
         }
 
-        public static T TraceError<T>(T ex)
+        public static void TraceError(Exception ex, [CallerMemberName] string methodName = "")
         {
-            if (ex is Exception)
-            {
-                var e = ex as Exception;
-                TraceError(e.Message, e);
-            }
-            return ex;
+            TraceError($"{ex.Message} - {ex}", methodName: methodName);
         }
     }
 }

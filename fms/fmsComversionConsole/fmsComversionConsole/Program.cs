@@ -15,16 +15,11 @@ namespace fmsComversionConsole
     // gif to mp4 -- https://unix.stackexchange.com/questions/40638/how-to-do-i-convert-an-animated-gif-to-an-mp4-or-mv4-on-the-command-line
     internal class Program
     {
-        static void Trace(string message)
-        {
-            Console.WriteLine(message);
-            Logger.Trace(message, replaceCRLF: false);
-        }
-
         static void Main(string[] args)
         {
             try
             {
+                Logger.TraceToConsole = true;
                 var cmdParser = new Parser(config => config.HelpWriter = null);
                 var parsingTry = cmdParser.ParseArguments<ConversionHlsCommandLine, DownloadHlsAssetsCommandLine, VideoInfoCommandLine, ConversionGifToMp4CommandLine>(args);
                 var r = parsingTry.MapResult(
@@ -51,13 +46,13 @@ namespace fmsComversionConsole
                       (VideoInfoCommandLine options) =>
                       {
                           var vc = new fms.VideoManager(options.VideoFileName);
-                          Trace(vc.GetVideoInfo());
+                          Logger.Trace(vc.GetVideoInfo());
                           return 0;
                       },
                       (ConversionGifToMp4CommandLine options) =>
                       {
                           var vc = new fms.VideoManager(options.GifFileName);
-                          Trace(vc.GetVideoInfo());
+                          Logger.Trace(vc.GetVideoInfo());
                           vc.ConvertGifToMp4(options.Mp4FileName, options.BitRateKb, options.FFMPEG_EXE);
                           return 0;
                       },
@@ -67,7 +62,7 @@ namespace fmsComversionConsole
             }
             catch (Exception ex)
             {
-                Logger.TraceError(ex.ToString());
+                Logger.TraceError(ex);
             }
         }
     }
