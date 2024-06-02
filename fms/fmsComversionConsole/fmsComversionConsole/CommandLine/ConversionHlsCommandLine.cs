@@ -41,8 +41,7 @@ namespace fmsComversionConsole
         [CommandLine.Option('r', "resolutions", Required = false, HelpText = "Resolution")]
         public string Resolutions { get; set; } = "1080p,720p,480p";
 
-        [CommandLine.Option('f', "fmsVideoId", Required = false, HelpText = "fmsVideoId")]
-        public string fmsVideoId { get; set; } = "";
+        
 
         [CommandLine.Option('f', "deriveFmsVideoId", Required = false, HelpText = "deriveFmsVideoId")]
         public bool DeriveFmsVideoId { get; set; } = false;

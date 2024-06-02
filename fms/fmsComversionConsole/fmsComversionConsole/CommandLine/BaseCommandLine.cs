@@ -12,5 +12,8 @@ namespace fmsComversionConsole
 
         [CommandLine.Option('o', "outputfolder", Required = false, HelpText = "outputfolder")]
         public string OutputFolder { get; set; } = @"C:\temp\stream\hls";
+
+        [CommandLine.Option('f', "fmsVideoId", Required = false, HelpText = "fmsVideoId")]
+        public string fmsVideoId { get; set; } = "";
     }
 }

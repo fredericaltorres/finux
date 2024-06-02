@@ -39,9 +39,9 @@ namespace fmsComversionConsole
                       {
                           var hlsM = new HlsManager(options.MasterM3U8Url, options.QueryString);
 
-                          Logger.Trace($"DownloadHlsAssets {options.MasterM3U8Url}", new { }, replaceCRLF: false);
+                          Logger.Trace($"DownloadHlsAssets {options.MasterM3U8Url}, resolutions: {hlsM.GetAllResolutionDefinition()}", new { }, replaceCRLF: false);
 
-                          var downloadInfo = hlsM.DownloadHlsAssets(options.OutputFolder);
+                          var downloadInfo = hlsM.DownloadHlsAssets(options.OutputFolder, options.fmsVideoId, options.Concat);
                           Logger.Trace($"{downloadInfo.ToJSON()}", new { }, replaceCRLF: false);
                           //var data = hlsM.GetMasterInfo();
                           //Logger.Trace($"{data}", new { }, replaceCRLF: false);
