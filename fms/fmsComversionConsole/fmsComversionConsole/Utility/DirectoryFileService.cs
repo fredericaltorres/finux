@@ -6,6 +6,11 @@ namespace fms
 {
     public class DirectoryFileService
     {
+        public static bool IsUrl(string url)
+        {
+            return (!string.IsNullOrEmpty(url)) && (url.TrimStart().StartsWith("http://") || url.TrimStart().StartsWith("https://"));
+        }
+
         public static string GetContentType(string fileName)
         {
             var ext = Path.GetExtension(fileName).ToLower();

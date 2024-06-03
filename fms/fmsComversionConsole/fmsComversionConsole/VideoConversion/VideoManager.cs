@@ -19,11 +19,11 @@ namespace fms
 {
     public partial class VideoManager
     {
-        public string _inputVideoFileNameOrUrl { get; }
         private MediaInfo _mediaInfo { get; set; }
+        private string _inputVideoFileNameOrUrl { get; }
+        
         public int Width => GetVideoStream.Width;
         public int Height => GetVideoStream.Height;
-
         public bool IsSquareResolution => Width == Height;
 
         public StreamInfo GetVideoStream => _mediaInfo.Streams.Where(s => s.CodecType == "video").FirstOrDefault();
@@ -36,12 +36,7 @@ namespace fms
             _mediaInfo = ffProbe.GetMediaInfo(_inputVideoFileNameOrUrl);
             
         }
-
-        public bool IsUrl(string url)
-        {
-            return  (!string.IsNullOrEmpty(url)) && (url.TrimStart().StartsWith("http://") || url.TrimStart().StartsWith("https://"));
-        }
-
+   
         // https://www.nrecosite.com/video_info_net.aspx
         public string GetVideoInfo()
         {
@@ -49,7 +44,7 @@ namespace fms
             sb.Append($"file: {this._inputVideoFileNameOrUrl}").AppendLine();
 
             var fileSize = -1L;
-            if(!IsUrl(this._inputVideoFileNameOrUrl))
+            if(!DirectoryFileService.IsUrl(this._inputVideoFileNameOrUrl))
                 fileSize = new FileInfo(this._inputVideoFileNameOrUrl).Length;
 
             var v = _mediaInfo;
@@ -60,7 +55,6 @@ namespace fms
 
             return sb.ToString();
         }
-
 
         public void FixPathInM3U8(string videoFolder, string search, string replacement)
         {
@@ -73,13 +67,13 @@ namespace fms
             }
         }
 
-
         // https://www.youtube.com/watch?v=xJQBnrJXyv4 Download HLS Streaming Video with PowerShell and FFMPEG
         public HlsConversionResult ConvertToHls(string hlsFolder, string ffmepexe, string azureStorageConnectionString, List<string> resolutionKeys, string cdnHost, string fmsVideoId = null, bool? deriveFmsVideoId = null)
         {
             Logger.Trace($"");
             Logger.Trace($"[CONVERSION] Start - {this.GetVideoInfo()}");
 
+            // fmdVideoId initialization, different mode possible
             if (string.IsNullOrEmpty(fmsVideoId))
                 fmsVideoId = Guid.NewGuid().ToString();
 
@@ -91,28 +85,31 @@ namespace fms
             var parentFolder = Path.Combine(hlsFolder, fmsVideoId);
             var videoFolder = Path.Combine(parentFolder, fmsVideoId);
             var resolutions = new List<VideoResolution>();
+            var skippedResolutions = new List<VideoResolution>();
             var c = new HlsConversionResult { InputFile = _inputVideoFileNameOrUrl, fmsVideoId = fmsVideoId, LocalFolder = parentFolder, Resolutions = resolutions };
 
-            Logger.Trace($"[CONVERSION] InputFile: {c.InputFile}", this);
-            Logger.Trace($"[CONVERSION] fmsVideoId: {c.fmsVideoId}", this);
+            Logger.Trace($"[CONVERSION] {DS.Dictionary(new { c.InputFile, c.fmsVideoId, videoFolder }).Format()}", this);
 
-            new TestFileHelper().DeleteDirectory(parentFolder);
-            Directory.CreateDirectory(parentFolder);
+            DirectoryFileService.CreateDirectory(parentFolder, deleteIfExists: true);
 
             foreach(var rk in resolutionKeys)
             {
                 if (VideoResolution.VideoResolutions.ContainsKey(rk))
                 {
                     var videoResolution = VideoResolution.VideoResolutions[rk];
-                    if (this.Height >= videoResolution.Height)
+                    if (videoResolution.CanVideoBeConvertedToResolution( this.Width, this.Height ))
                         resolutions.Add(videoResolution);
+                    else 
+                        skippedResolutions.Add(videoResolution);
                 }
             }
 
             Logger.Trace($"[RESOLUTIONS]{string.Join(", ", resolutions.Select(rso => rso.Name))}", this);
+            Logger.Trace($"[SKIPPED.RESOLUTIONS]{string.Join(", ", skippedResolutions.Select(rso => rso.Name))}", this);
+
+            // Generate the FFMPEG command line, up to 3 resolutions supported
 
             var sb = new StringBuilder();
-
             sb.Append($@"-i ""{_inputVideoFileNameOrUrl}"" ");
 
             // Define how many resolutions we are going to create
@@ -233,7 +230,7 @@ namespace fms
 
             // Upload the original video as url or as local file
             var orginalVideoBlobName = Path.GetFileName(orginalVideo);
-            if (IsUrl(orginalVideo))
+            if (DirectoryFileService.IsUrl(orginalVideo))
             {
                 var localorginalVideo = DirectoryFileService.DownloadFile(orginalVideo);
                 bm.UploadBlobStreamAsync(containerName, orginalVideoBlobName, File.OpenRead(TraceUploading(localorginalVideo)), DirectoryFileService.GetContentType(localorginalVideo)).GetAwaiter().GetResult();
