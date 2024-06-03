@@ -21,13 +21,21 @@ namespace fmsComversionConsole
             {
                 Logger.TraceToConsole = true;
                 var cmdParser = new Parser(config => config.HelpWriter = null);
-                var parsingTry = cmdParser.ParseArguments<ConversionHlsCommandLine, DownloadHlsAssetsCommandLine, VideoInfoCommandLine, ConversionGifToMp4CommandLine>(args);
+                var parsingTry = cmdParser.ParseArguments<AudioConversionHlsCommandLine, VideoConversionHlsCommandLine, DownloadHlsAssetsCommandLine, VideoInfoCommandLine, ConversionGifToMp4CommandLine> (args);
+
                 var r = parsingTry.MapResult(
-                      (ConversionHlsCommandLine options) =>
+
+                      (AudioConversionHlsCommandLine options) =>
+                      {
+                          var vc = new fms.VideoManager(options.AudioFileName);
+                          var c = vc.ConvertAudioToHls(options.HlsFolder, options.FFMPEG_EXE, options.FMS_AZURE_STORAGE_CONNECTION_STRING, options.CDN_HOST, options.fmsVideoId, options.DeriveFmsVideoId);
+                          return 0;
+                      },
+                      (VideoConversionHlsCommandLine options) =>
                       {
                           var vc = new fms.VideoManager(options.VideoFileName);
                           
-                          var c = vc.ConvertToHls(options.HlsFolder, options.FFMPEG_EXE, options.FMS_AZURE_STORAGE_CONNECTION_STRING, options.ResolutionList, options.CDN_HOST, options.fmsVideoId, options.DeriveFmsVideoId);
+                          var c = vc.ConvertVideoToHls(options.HlsFolder, options.FFMPEG_EXE, options.FMS_AZURE_STORAGE_CONNECTION_STRING, options.ResolutionList, options.CDN_HOST, options.fmsVideoId, options.DeriveFmsVideoId);
                           return 0;
                       },
                       (DownloadHlsAssetsCommandLine options) =>

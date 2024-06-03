@@ -15,6 +15,7 @@ using static fms.VideoManager;
 using NReco.VideoConverter;
 using Azure;
 using fmsComversionConsole.Utility;
+using M3U8Parser.Attributes;
 
 namespace fms
 {
@@ -67,13 +68,67 @@ namespace fms
             }
         }
 
+        public HlsConversionResult ConvertAudioToHls(string hlsFolder, string ffmepexe, string azureStorageConnectionString, string cdnHost, string fmsVideoId = null, bool? deriveFmsVideoId = null)
+        {
+            Logger.Trace($"");
+            Logger.Trace($"[CONVERSION][AUDIO] Start - {this.GetVideoInfo()}");
+
+            // fmdVideoId initialization, different mode possible
+            if (string.IsNullOrEmpty(fmsVideoId))
+                fmsVideoId = Guid.NewGuid().ToString();
+
+            if (deriveFmsVideoId.HasValue && deriveFmsVideoId.Value)
+            {
+                // This is an audio file .wav/.mp3
+                fmsVideoId = DirectoryFileService.MakeNameAzureContainerNameSafe(Path.GetFileNameWithoutExtension(this._inputVideoFileNameOrUrl));
+            }
+
+            var parentFolder = Path.Combine(hlsFolder, fmsVideoId);
+            var audioFolder = parentFolder;// Path.Combine(parentFolder, fmsVideoId);
+
+            var c = new HlsConversionResult { InputFile = _inputVideoFileNameOrUrl, fmsVideoId = fmsVideoId, LocalFolder = parentFolder };
+
+            Logger.Trace($"[CONVERSION] {DS.Dictionary(new { c.InputFile, c.fmsVideoId, audioFolder }).Format()}", this);
+            DirectoryFileService.CreateDirectory(parentFolder, deleteIfExists: true);
+
+            // Generate the FFMPEG command line, up to 3 resolutions supported
+            var sb = new StringBuilder();
+            sb.Append($@"-i ""{_inputVideoFileNameOrUrl}"" -c:a aac -b:a 128k -f segment -segment_time 10 -segment_list ""{audioFolder}\playlist.m3u8"" ");
+            //sb.Append($@"-segment_format mpegts output%03d.ts");
+            sb.Append($@"-segment_format mpegts ""{audioFolder}/audio%04d.ts""");
+            // sb.Append($@"-hls_segment_filename ""{audioFolder}-%v/data%04d.ts"" -use_localtime_mkdir 1 ");
+            c.FFMPEGCommandLine = sb.ToString();
+
+            var exitCode = 0;
+            var r = ExecuteProgramUtilty.ExecProgram(ffmepexe, sb.ToString(), ref exitCode);
+            c.Success = r && exitCode == 0;
+
+            var tsFileSize = 0L;
+            if (c.Success)
+            {
+                // Finalize the HLS conversion
+                FixPathInM3U8(parentFolder, audioFolder, fmsVideoId);
+                (c.mu38MasterUrl, c.ThumbnailUrl, c.TsFileSize) = UploadToAzureStorage(this._inputVideoFileNameOrUrl, null, parentFolder, fmsVideoId, azureStorageConnectionString, cdnHost);
+            }
+            else
+            {
+                DirectoryFileService.DeleteDirectory(parentFolder);
+            }
+
+            Logger.Trace($"[SUMMARY] {c.ToJson()}", this);
+            Logger.Trace($@"[JAVASCRIPT] const cdn_url = ""{c.mu38MasterUrl}""; // {Path.GetFileName(c.InputFile)}", this);
+            Logger.Trace($@"mu38MasterUrl: ({c.mu38MasterUrl})", this);
+
+            return c;
+        }
+
         public const int CONVERSION_MAX_RESOLUTIONS = 3;
 
         // https://www.youtube.com/watch?v=xJQBnrJXyv4 Download HLS Streaming Video with PowerShell and FFMPEG
-        public HlsConversionResult ConvertToHls(string hlsFolder, string ffmepexe, string azureStorageConnectionString, List<string> resolutionKeys, string cdnHost, string fmsVideoId = null, bool? deriveFmsVideoId = null)
+        public HlsConversionResult ConvertVideoToHls(string hlsFolder, string ffmepexe, string azureStorageConnectionString, List<string> resolutionKeys, string cdnHost, string fmsVideoId = null, bool? deriveFmsVideoId = null)
         {
             Logger.Trace($"");
-            Logger.Trace($"[CONVERSION] Start - {this.GetVideoInfo()}");
+            Logger.Trace($"[CONVERSION][VIDEO] Start - {this.GetVideoInfo()}");
 
             // fmdVideoId initialization, different mode possible
             if (string.IsNullOrEmpty(fmsVideoId))

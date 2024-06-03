@@ -29,7 +29,7 @@ namespace fmsComversionConsole
     //
     */
     [Verb("convertToHls", HelpText = "convertToHls")]
-    public class ConversionHlsCommandLine : BaseCommandLine
+    public class VideoConversionHlsCommandLine : BaseCommandLine
     {
         [CommandLine.Option('v', "videoFileName", Required = false, HelpText = "VideoFileName")]
         public string VideoFileName { get; set; }
@@ -41,11 +41,23 @@ namespace fmsComversionConsole
         [CommandLine.Option('r', "resolutions", Required = false, HelpText = "Resolution")]
         public string Resolutions { get; set; } = "1080p,720p,480p";
 
-        
-
         [CommandLine.Option('f', "deriveFmsVideoId", Required = false, HelpText = "deriveFmsVideoId")]
         public bool DeriveFmsVideoId { get; set; } = false;
 
         public List<string> ResolutionList { get { return this.Resolutions.Split(DS.List(",").ToArray(), StringSplitOptions.RemoveEmptyEntries).ToList();  } }
+    }
+
+    // fmsComversionConsole.exe convertAudioToHls  --deriveFmsVideoId --audioFileName "https://fredcloud.blob.core.windows.net/zic/Phil.2022.Instrumental.wav"
+    [Verb("convertAudioToHls", HelpText = "convertToHls")]
+    public class AudioConversionHlsCommandLine : BaseCommandLine
+    {
+        [CommandLine.Option('a', "audioFileName", Required = false, HelpText = "audioFileName")]
+        public string AudioFileName { get; set; }
+
+        [CommandLine.Option('h', "HlsFolder", Required = false, HelpText = "HlsFolder")]
+        public string HlsFolder { get; set; } = "C:\\temp\\stream\\hls";
+
+        [CommandLine.Option('f', "deriveFmsVideoId", Required = false, HelpText = "deriveFmsVideoId")]
+        public bool DeriveFmsVideoId { get; set; } = false;
     }
 }

@@ -118,7 +118,7 @@
     <Compile Include="CommandLine\BaseCommandLine.cs" />
     <Compile Include="CommandLine\DownloadHlsAssetsCommandLine.cs" />
     <Compile Include="CommandLine\ConversionGifToMp4CommandLine.cs" />
-    <Compile Include="CommandLine\ConversionHlsCommandLine.cs" />
+    <Compile Include="CommandLine\VideoConversionHlsCommandLine.cs" />
     <Compile Include="CommandLine\VideoInfoCommandLine.cs" />
     <Compile Include="Utility\BlobManager.cs" />
     <Compile Include="Utility\ExecuteProgramUtilty.cs" />
