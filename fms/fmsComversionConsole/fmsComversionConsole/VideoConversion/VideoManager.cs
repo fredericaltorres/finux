@@ -14,6 +14,7 @@ using static NReco.VideoInfo.MediaInfo;
 using static fms.VideoManager;
 using NReco.VideoConverter;
 using Azure;
+using fmsComversionConsole.Utility;
 
 namespace fms
 {
@@ -34,7 +35,6 @@ namespace fms
             _inputVideoFileNameOrUrl = videoFileName;
             var ffProbe = new NReco.VideoInfo.FFProbe();
             _mediaInfo = ffProbe.GetMediaInfo(_inputVideoFileNameOrUrl);
-            
         }
    
         // https://www.nrecosite.com/video_info_net.aspx
@@ -67,6 +67,8 @@ namespace fms
             }
         }
 
+        public const int CONVERSION_MAX_RESOLUTIONS = 3;
+
         // https://www.youtube.com/watch?v=xJQBnrJXyv4 Download HLS Streaming Video with PowerShell and FFMPEG
         public HlsConversionResult ConvertToHls(string hlsFolder, string ffmepexe, string azureStorageConnectionString, List<string> resolutionKeys, string cdnHost, string fmsVideoId = null, bool? deriveFmsVideoId = null)
         {
@@ -79,7 +81,7 @@ namespace fms
 
             if(deriveFmsVideoId.HasValue && deriveFmsVideoId.Value)
             {
-                fmsVideoId = MakeNameAzureContainerNameSafe(Path.GetFileNameWithoutExtension(this._inputVideoFileNameOrUrl));
+                fmsVideoId = DirectoryFileService.MakeNameAzureContainerNameSafe(Path.GetFileNameWithoutExtension(this._inputVideoFileNameOrUrl));
             }
 
             var parentFolder = Path.Combine(hlsFolder, fmsVideoId);
@@ -89,18 +91,21 @@ namespace fms
             var c = new HlsConversionResult { InputFile = _inputVideoFileNameOrUrl, fmsVideoId = fmsVideoId, LocalFolder = parentFolder, Resolutions = resolutions };
 
             Logger.Trace($"[CONVERSION] {DS.Dictionary(new { c.InputFile, c.fmsVideoId, videoFolder }).Format()}", this);
-
             DirectoryFileService.CreateDirectory(parentFolder, deleteIfExists: true);
 
+            // Analyse which resolution can be applied to video
             foreach(var rk in resolutionKeys)
             {
                 if (VideoResolution.VideoResolutions.ContainsKey(rk))
                 {
                     var videoResolution = VideoResolution.VideoResolutions[rk];
-                    if (videoResolution.CanVideoBeConvertedToResolution( this.Width, this.Height ))
+                    if (videoResolution.CanVideoBeConvertedToResolution(this.Width, this.Height))
+                    {
                         resolutions.Add(videoResolution);
-                    else 
-                        skippedResolutions.Add(videoResolution);
+                        if(resolutions.Count == CONVERSION_MAX_RESOLUTIONS) // for now we only support 3 resolutions in the ffmpeg command line, could be extended
+                            break;
+                    }
+                    else skippedResolutions.Add(videoResolution);
                 }
             }
 
@@ -159,13 +164,12 @@ namespace fms
 
             var exitCode = 0;
             var r = ExecuteProgramUtilty.ExecProgram(ffmepexe, sb.ToString(), ref exitCode);
-
             c.Success = r && exitCode == 0;
 
             var tsFileSize = 0L;
-
             if (c.Success)
             {
+                // Finalize the HLS conversion
                 FixPathInM3U8(parentFolder, videoFolder, fmsVideoId);
                 var thumbnailLocalFile = GetVideoThumbnail(this._inputVideoFileNameOrUrl);
                 (c.mu38MasterUrl, c.ThumbnailUrl, c.TsFileSize) = UploadToAzureStorage(this._inputVideoFileNameOrUrl, thumbnailLocalFile, parentFolder, fmsVideoId, azureStorageConnectionString, cdnHost);
@@ -181,26 +185,6 @@ namespace fms
             Logger.Trace($@"ThumbnailUrl: ({c.ThumbnailUrl})", this);
 
             return c;
-        }
-
-        const int MAX_CONTAINER_NAME_LENGTH = 63;
-        private string MakeNameAzureContainerNameSafe(string v)
-        {
-            var vv = v.ToLowerInvariant();
-            var sb = new StringBuilder();
-            foreach(var c in vv)
-            {
-                if (char.IsLetterOrDigit(c))
-                    sb.Append(c);
-                else 
-                    sb.Append("-");
-            }
-
-            var rr = sb.ToString();
-            rr = rr.Replace("--", "-");
-            rr = rr.Substring(0, Math.Min(MAX_CONTAINER_NAME_LENGTH, rr.Length));
-
-            return rr;
         }
 
         public string GetVideoThumbnail(string videoFileName)
@@ -251,16 +235,11 @@ namespace fms
                 bm.UploadBlobStreamAsync(containerName, blobName, File.OpenRead(TraceUploading(f)), DirectoryFileService.GetContentType(f)).GetAwaiter().GetResult();
             }
 
-            // Get the URL for the thumbnail
-            var thumbnailUrl = bm.GetBlobURL(containerName, thumbnailBlobName).ToString();
+            var thumbnailUrl = bm.GetBlobURL(containerName, thumbnailBlobName).ToString(); // Get the URL for the thumbnail
             var thumbnailUrlFromCDN = DirectoryFileService.RemoveQueryStringFromUri(DirectoryFileService.ReplaceHostInUri(thumbnailUrl, cdnHost));
-
-            // get the URL for the master.m3u8
-            var masterUrlDirectFromStorage = bm.GetBlobURL(containerName, "master.m3u8").ToString();
+            var masterUrlDirectFromStorage = bm.GetBlobURL(containerName, "master.m3u8").ToString(); // get the URL for the master.m3u8
             var masterUrlFromCDN = DirectoryFileService.RemoveQueryStringFromUri(DirectoryFileService.ReplaceHostInUri(masterUrlDirectFromStorage, cdnHost));
-
             var resolutionFolders = files.Select(ff => Path.GetFileNameWithoutExtension(ff)).ToList().Filter(f => !f.Contains("master")).ToList();
-
             var tsFilesSize = 0L;
 
             foreach(var rf in resolutionFolders)
@@ -273,13 +252,14 @@ namespace fms
                     bm.UploadBlobStreamAsync(containerName, blobName, File.OpenRead(TraceUploading(f)), DirectoryFileService.GetContentType(f)).GetAwaiter().GetResult();
                 }
             }
+
             return (masterUrlFromCDN, thumbnailUrlFromCDN, tsFilesSize);
         }
 
         public GifToMp4ConversionResult ConvertGifToMp4(string mp4FileName, int bitRateKb, string ffmepexe)
         {
-            using (var tfh = new TestFileHelper()) {
-
+            using (var tfh = new TestFileHelper()) 
+            {
                 tfh.DeleteFile(mp4FileName);
 
                 var r = new GifToMp4ConversionResult { InputFile = this._inputVideoFileNameOrUrl };
@@ -288,8 +268,6 @@ namespace fms
 
                 // sb.Append($@" -f gif -i ""{this._inputVideoFileNameOrUrl}"" ""{mp4FileName}"" ");
                 //sb.Append($@" -i ""{this._inputVideoFileNameOrUrl}"" -c:v libvpx -crf 12 -b:v 500K ""{mp4FileName}"" ");
-                                //  
-
                 // ffmpeg -f gif -i infile.gif outfile.mp4
 
                 r.FFMPEGCommandLine = sb.ToString();
@@ -301,10 +279,10 @@ namespace fms
 
                 if (r.Success)
                 {
-                    var r2 = AddBlankAudioTrack(mp4FileName, ffmepexe, tfh);
+                    var r2 = FFMPEG.AddBlankAudioTrack(mp4FileName, ffmepexe, tfh);
                     if (r2.Success)
                     {
-                        var r3 = ChangeBitrate(r2.Mp4FileName, bitRateKb, ffmepexe, tfh);
+                        var r3 = FFMPEG.ChangeBitrate(r2.Mp4FileName, bitRateKb, ffmepexe, tfh);
                         if(r3.Success)
                         {
                             File.Copy(r3.Mp4FileName, mp4FileName, true);
@@ -328,77 +306,5 @@ namespace fms
             }
         }
 
-        public AddAudioTrackResult AddBlankAudioTrack(string mp4FileName, string ffmepexe, TestFileHelper tfh)
-        {
-            var mp4FileNameWithAudio = tfh.GetTempFileName("mp4");
-            var r = new AddAudioTrackResult { InputFile = mp4FileName };
-            var sb = new StringBuilder();
-            r.Mp4FileName = mp4FileNameWithAudio;
-            sb.Append($@"-f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100 -i ""{mp4FileName}"" -c:v copy -c:a aac -shortest ""{mp4FileNameWithAudio}"" ");
-            r.FFMPEGCommandLine = sb.ToString();
-            var exitCode = 0;
-            var rr = ExecuteProgramUtilty.ExecProgram(ffmepexe, sb.ToString(), ref exitCode);
-            r.Success = rr && exitCode == 0;
-            r.Done();
-
-            if (r.Success)
-            {
-            }
-            else
-            {
-            }
-            Logger.Trace($"{r.ToJson()}", this);
-
-            return r;
-        }
-
-        public ChangeBitRateConversionResult ChangeBitrate(string mp4FileName, int bitRateKb, string ffmepexe, TestFileHelper tfh)
-        {
-            var mp4FileNameH265 = tfh.GetTempFileName("mp4");
-            var r = new ChangeBitRateConversionResult { InputFile = mp4FileName };
-            var sb = new StringBuilder();
-            r.Mp4FileName = mp4FileNameH265;
-            sb.Append($@" -i ""{mp4FileName}""  -b {bitRateKb}k  ""{mp4FileNameH265}"" ");
-            r.FFMPEGCommandLine = sb.ToString();
-            var exitCode = 0;
-            var rr = ExecuteProgramUtilty.ExecProgram(ffmepexe, sb.ToString(), ref exitCode);
-            r.Success = rr && exitCode == 0;
-            r.Done();
-            if (r.Success)
-            {
-            }
-            else
-            {
-            }
-            Logger.Trace($"{r.ToJson()}", this);
-
-            return r;
-        }
-
-        public H265ConversionResult ConvertToH265(string mp4FileName, string ffmepexe, TestFileHelper tfh)
-        {
-            var mp4FileNameH265 = tfh.GetTempFileName("mp4");
-            var r = new H265ConversionResult { InputFile = mp4FileName };
-            var sb = new StringBuilder();
-            r.Mp4FileName = mp4FileNameH265;
-
-            sb.Append($@" -i ""{mp4FileName}"" -vcodec libx265 -crf 28 ""{mp4FileNameH265}"" ");
-
-            r.FFMPEGCommandLine = sb.ToString();
-            var exitCode = 0;
-            var rr = ExecuteProgramUtilty.ExecProgram(ffmepexe, sb.ToString(), ref exitCode);
-            r.Success = rr && exitCode == 0;
-            r.Done();
-
-            if (r.Success)
-            {
-            }
-            else
-            {
-            }
-            Logger.Trace($"{r.ToJson()}", this);
-
-            return r;
-        }
     }
 }

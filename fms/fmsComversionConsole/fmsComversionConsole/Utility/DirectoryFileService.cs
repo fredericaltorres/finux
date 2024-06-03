@@ -1,11 +1,33 @@
 ﻿using DynamicSugar;
 using System;
 using System.IO;
+using System.Text;
 
 namespace fms
 {
     public class DirectoryFileService
     {
+        const int MAX_CONTAINER_NAME_LENGTH = 63;
+
+        public static string MakeNameAzureContainerNameSafe(string v)
+        {
+            var vv = v.ToLowerInvariant();
+            var sb = new StringBuilder();
+            foreach (var c in vv)
+            {
+                if (char.IsLetterOrDigit(c))
+                    sb.Append(c);
+                else
+                    sb.Append("-");
+            }
+
+            var rr = sb.ToString();
+            rr = rr.Replace("--", "-");
+            rr = rr.Substring(0, Math.Min(MAX_CONTAINER_NAME_LENGTH, rr.Length));
+
+            return rr;
+        }
+
         public static bool IsUrl(string url)
         {
             return (!string.IsNullOrEmpty(url)) && (url.TrimStart().StartsWith("http://") || url.TrimStart().StartsWith("https://"));
