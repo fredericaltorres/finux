@@ -246,7 +246,7 @@ namespace fms
             return (await containerClient.ExistsAsync());
         }
 
-        public async Task DeleteBlobContainer(string containerName, bool waitAfterDeletion, int waitTime = 10)
+        public async Task DeleteBlobContainer(string containerName, bool waitAfterDeletion, int waitTime = 30)
         {
             BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
             if (await containerClient.ExistsAsync())

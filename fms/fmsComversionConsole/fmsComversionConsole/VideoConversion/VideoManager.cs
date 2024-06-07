@@ -21,6 +21,11 @@ namespace fms
 {
     public partial class VideoManager
     {
+
+        const string masterM3u8Filemame = "master.m3u8";
+        const string AudioPlayListM3u8Filemame = "audioplaylist.m3u8";
+        
+
         private MediaInfo _mediaInfo { get; set; }
         private string _inputVideoFileNameOrUrl { get; }
         
@@ -42,7 +47,7 @@ namespace fms
         public string GetVideoInfo()
         {
             var sb = new StringBuilder();
-            sb.Append($"file: {this._inputVideoFileNameOrUrl}").AppendLine();
+            sb.Append($"file: {this._inputVideoFileNameOrUrl}, ").AppendLine();
 
             var fileSize = -1L;
             if(!DirectoryFileService.IsUrl(this._inputVideoFileNameOrUrl))
@@ -93,7 +98,7 @@ namespace fms
 
             // Generate the FFMPEG command line, up to 3 resolutions supported
             var sb = new StringBuilder();
-            sb.Append($@"-i ""{_inputVideoFileNameOrUrl}"" -c:a aac -b:a 128k -f segment -segment_time 10 -segment_list ""{audioFolder}\playlist.m3u8"" ");
+            sb.Append($@"-i ""{_inputVideoFileNameOrUrl}"" -c:a aac -b:a 128k -f segment -segment_time 10 -segment_list ""{audioFolder}\audioplaylist.m3u8"" ");
             //sb.Append($@"-segment_format mpegts output%03d.ts");
             sb.Append($@"-segment_format mpegts ""{audioFolder}/audio%04d.ts""");
             // sb.Append($@"-hls_segment_filename ""{audioFolder}-%v/data%04d.ts"" -use_localtime_mkdir 1 ");
@@ -207,7 +212,7 @@ namespace fms
             sb.Append($@"-f hls -hls_time {hls_time} -hls_playlist_type vod ");
             sb.Append($@"-hls_flags independent_segments -hls_segment_type mpegts ");
             sb.Append($@"-hls_segment_filename ""{videoFolder}-%v/data%04d.ts"" -use_localtime_mkdir 1 ");
-            sb.Append($@"-master_pl_name ""master.m3u8"" ");
+            sb.Append($@"-master_pl_name ""{masterM3u8Filemame}"" ");
 
             sb.Append($@"-var_stream_map """); //sb.Append($@"-var_stream_map ""v:0,a:0 v:1,a:1"" ");
             for (var re = 0; re < resolutions.Count; re++)
@@ -259,7 +264,11 @@ namespace fms
 
         private (string, string, long) UploadToAzureStorage(string orginalVideo, string thumbnailLocalFile, string parentFolder, string fmsVideoId, string azureStorageConnectionString, string cdnHost)
         {
+            var masterM3U8Exists = File.Exists(Path.Combine(parentFolder, masterM3u8Filemame));
+            var audioPlayListM3U8Exists = File.Exists(Path.Combine(parentFolder, AudioPlayListM3u8Filemame));
+            
             var thumbnailBlobName = "thumbnail.jpg";
+            var thumbnailBlobNameExists = File.Exists(thumbnailLocalFile);
             Logger.Trace($"Uploading to Azure fmsVideoId:{fmsVideoId}", this);
             var containerName = fmsVideoId;
             var r = string.Empty;
@@ -279,8 +288,10 @@ namespace fms
                 bm.UploadBlobStreamAsync(containerName, orginalVideoBlobName, File.OpenRead(TraceUploading(orginalVideo)), DirectoryFileService.GetContentType(orginalVideo)).GetAwaiter().GetResult();
             }
 
-            // Upload the thumbnail
-            bm.UploadBlobStreamAsync(containerName, thumbnailBlobName, File.OpenRead(TraceUploading(thumbnailLocalFile)), DirectoryFileService.GetContentType(orginalVideo)).GetAwaiter().GetResult();
+            if (thumbnailBlobNameExists) // Upload the thumbnail
+            {
+                bm.UploadBlobStreamAsync(containerName, thumbnailBlobName, File.OpenRead(TraceUploading(thumbnailLocalFile)), DirectoryFileService.GetContentType(orginalVideo)).GetAwaiter().GetResult();
+            }
 
             // Upload the m3u8 files
             var files = Directory.GetFiles(parentFolder, "*.m3u8").ToList();
@@ -290,20 +301,42 @@ namespace fms
                 bm.UploadBlobStreamAsync(containerName, blobName, File.OpenRead(TraceUploading(f)), DirectoryFileService.GetContentType(f)).GetAwaiter().GetResult();
             }
 
-            var thumbnailUrl = bm.GetBlobURL(containerName, thumbnailBlobName).ToString(); // Get the URL for the thumbnail
-            var thumbnailUrlFromCDN = DirectoryFileService.RemoveQueryStringFromUri(DirectoryFileService.ReplaceHostInUri(thumbnailUrl, cdnHost));
-            var masterUrlDirectFromStorage = bm.GetBlobURL(containerName, "master.m3u8").ToString(); // get the URL for the master.m3u8
-            var masterUrlFromCDN = DirectoryFileService.RemoveQueryStringFromUri(DirectoryFileService.ReplaceHostInUri(masterUrlDirectFromStorage, cdnHost));
-            var resolutionFolders = files.Select(ff => Path.GetFileNameWithoutExtension(ff)).ToList().Filter(f => !f.Contains("master")).ToList();
-            var tsFilesSize = 0L;
-
-            foreach(var rf in resolutionFolders)
+            var thumbnailUrlFromCDN = string.Empty;
+            if (thumbnailBlobNameExists)
             {
-                var filesInResolution = Directory.GetFiles(parentFolder, $"{rf}\\*.ts").ToList();
-                foreach (var f in filesInResolution)
+                var thumbnailUrl = bm.GetBlobURL(containerName, thumbnailBlobName).ToString(); // Get the URL for the thumbnail
+                thumbnailUrlFromCDN = DirectoryFileService.RemoveQueryStringFromUri(DirectoryFileService.ReplaceHostInUri(thumbnailUrl, cdnHost));
+            }
+
+            var tsFilesSize = 0L;
+            var masterUrlFromCDN = string.Empty;
+            if (masterM3U8Exists)
+            {
+                var masterUrlDirectFromStorage = bm.GetBlobURL(containerName, masterM3u8Filemame).ToString(); // get the URL for the master.m3u8
+                masterUrlFromCDN = DirectoryFileService.RemoveQueryStringFromUri(DirectoryFileService.ReplaceHostInUri(masterUrlDirectFromStorage, cdnHost));
+                var resolutionFolders = files.Select(ff => Path.GetFileNameWithoutExtension(ff)).ToList().Filter(f => !f.Contains("master")).ToList();
+
+                foreach (var rf in resolutionFolders)
+                {
+                    var filesInResolution = Directory.GetFiles(parentFolder, $"{rf}\\*.ts").ToList();
+                    foreach (var f in filesInResolution)
+                    {
+                        tsFilesSize += new FileInfo(f).Length;
+                        var blobName = Path.Combine(rf, Path.GetFileName(f));
+                        bm.UploadBlobStreamAsync(containerName, blobName, File.OpenRead(TraceUploading(f)), DirectoryFileService.GetContentType(f)).GetAwaiter().GetResult();
+                    }
+                }
+            }
+            else if(audioPlayListM3U8Exists) // Audio file have 1 resolutions located in the root folder
+            {
+                var masterUrlDirectFromStorage = bm.GetBlobURL(containerName, AudioPlayListM3u8Filemame).ToString(); // get the URL for the master.m3u8
+                masterUrlFromCDN = DirectoryFileService.RemoveQueryStringFromUri(DirectoryFileService.ReplaceHostInUri(masterUrlDirectFromStorage, cdnHost));
+
+                var audioTsFiles = Directory.GetFiles(parentFolder, $"*.ts").ToList();
+                foreach (var f in audioTsFiles)
                 {
                     tsFilesSize += new FileInfo(f).Length;
-                    var blobName = Path.Combine(rf, Path.GetFileName(f));
+                    var blobName = Path.Combine(Path.GetFileName(f));
                     bm.UploadBlobStreamAsync(containerName, blobName, File.OpenRead(TraceUploading(f)), DirectoryFileService.GetContentType(f)).GetAwaiter().GetResult();
                 }
             }
