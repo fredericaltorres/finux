@@ -73,7 +73,7 @@ namespace fms
             }
         }
 
-        public HlsConversionResult ConvertAudioToHls(string hlsFolder, string ffmepexe, string azureStorageConnectionString, string cdnHost, string fmsVideoId = null, bool? deriveFmsVideoId = null)
+        public HlsConversionResult ConvertAudioToHls(string hlsFolder, string ffmepexe, string azureStorageConnectionString, string cdnHost, string fmsVideoId, bool deriveFmsVideoId, bool copyToAzure)
         {
             Logger.Trace($"");
             Logger.Trace($"[CONVERSION][AUDIO] Start - {this.GetVideoInfo()}");
@@ -82,7 +82,7 @@ namespace fms
             if (string.IsNullOrEmpty(fmsVideoId))
                 fmsVideoId = Guid.NewGuid().ToString();
 
-            if (deriveFmsVideoId.HasValue && deriveFmsVideoId.Value)
+            if (deriveFmsVideoId)
             {
                 // This is an audio file .wav/.mp3
                 fmsVideoId = DirectoryFileService.MakeNameAzureContainerNameSafe(Path.GetFileNameWithoutExtension(this._inputVideoFileNameOrUrl));
@@ -113,7 +113,10 @@ namespace fms
             {
                 // Finalize the HLS conversion
                 FixPathInM3U8(parentFolder, audioFolder, fmsVideoId);
-                (c.mu38MasterUrl, c.ThumbnailUrl, c.TsFileSize) = UploadToAzureStorage(this._inputVideoFileNameOrUrl, null, parentFolder, fmsVideoId, azureStorageConnectionString, cdnHost);
+                if (copyToAzure)
+                {
+                    (c.mu38MasterUrl, c.ThumbnailUrl, c.TsFileSize) = UploadToAzureStorage(this._inputVideoFileNameOrUrl, null, parentFolder, fmsVideoId, azureStorageConnectionString, cdnHost);
+                }
             }
             else
             {
@@ -130,7 +133,7 @@ namespace fms
         public const int CONVERSION_MAX_RESOLUTIONS = 3;
 
         // https://www.youtube.com/watch?v=xJQBnrJXyv4 Download HLS Streaming Video with PowerShell and FFMPEG
-        public HlsConversionResult ConvertVideoToHls(string hlsFolder, string ffmepexe, string azureStorageConnectionString, List<string> resolutionKeys, string cdnHost, string fmsVideoId = null, bool? deriveFmsVideoId = null)
+        public HlsConversionResult ConvertVideoToHls(string hlsFolder, string ffmepexe, string azureStorageConnectionString, List<string> resolutionKeys, string cdnHost, string fmsVideoId, bool deriveFmsVideoId, bool copyToAzure )
         {
             Logger.Trace($"");
             Logger.Trace($"[CONVERSION][VIDEO] Start - {this.GetVideoInfo()}");
@@ -139,7 +142,7 @@ namespace fms
             if (string.IsNullOrEmpty(fmsVideoId))
                 fmsVideoId = Guid.NewGuid().ToString();
 
-            if(deriveFmsVideoId.HasValue && deriveFmsVideoId.Value)
+            if(deriveFmsVideoId)
             {
                 fmsVideoId = DirectoryFileService.MakeNameAzureContainerNameSafe(Path.GetFileNameWithoutExtension(this._inputVideoFileNameOrUrl));
             }
@@ -171,6 +174,9 @@ namespace fms
 
             Logger.Trace($"[RESOLUTIONS]{string.Join(", ", resolutions.Select(rso => rso.Name))}", this);
             Logger.Trace($"[SKIPPED.RESOLUTIONS]{string.Join(", ", skippedResolutions.Select(rso => rso.Name))}", this);
+
+            if(resolutions.Count == 0)
+                throw new Exception($"No resolution can be applied to the video {this._inputVideoFileNameOrUrl} with resolution {this.Width}x{this.Height}");
 
             // Generate the FFMPEG command line, up to 3 resolutions supported
 
@@ -232,7 +238,11 @@ namespace fms
                 // Finalize the HLS conversion
                 FixPathInM3U8(parentFolder, videoFolder, fmsVideoId);
                 var thumbnailLocalFile = GetVideoThumbnail(this._inputVideoFileNameOrUrl);
-                (c.mu38MasterUrl, c.ThumbnailUrl, c.TsFileSize) = UploadToAzureStorage(this._inputVideoFileNameOrUrl, thumbnailLocalFile, parentFolder, fmsVideoId, azureStorageConnectionString, cdnHost);
+                if (copyToAzure)
+                {
+                    (c.mu38MasterUrl, c.ThumbnailUrl, c.TsFileSize) = UploadToAzureStorage(this._inputVideoFileNameOrUrl, thumbnailLocalFile, parentFolder, fmsVideoId, azureStorageConnectionString, cdnHost);
+                }
+                else Logger.Trace($"[CONVERSION] No upload to Azure", this);
             }
             else 
             {

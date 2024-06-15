@@ -1,0 +1,36 @@
+https://github.com/leandromoreira/digital_video_introduction/blob/master/encoding_pratical_examples.md
+https://github.com/leandromoreira/digital_video_introduction/blob/master/README.md#hands-on-check-video-properties
+https://github.com/leandromoreira/digital_video_introduction/blob/master/README.md#hands-on-check-video-properties
+
+
+# and-your-bird-can-sing-video-1
+
+#EXTM3U
+#EXT-X-VERSION:6
+#EXT-X-STREAM-INF:BANDWIDTH=1240800,RESOLUTION=1920x1080,CODECS="avc1.640028,mp4a.40.2"
+and-your-bird-can-sing-video-0.m3u8
+
+#EXT-X-STREAM-INF:BANDWIDTH=140800,RESOLUTION=1280x720,CODECS="avc1.64001f,mp4a.40.2"
+and-your-bird-can-sing-video-1.m3u8
+
+https://wwwqaz1.brainshark.com/IntegrationTesting_Converters_Cheetah_Company_RMS/vu?pi=zHCz5j9QbzAjfYz0
+
+
+
+https://bskrmsqauswest-uswe.azureedge.net/bc32473d-5a00-4455-b406-08dc8bc22537/s1433683.ism/Manifest(format=m3u8-cmaf)?2AgceIW5oIK_9bua5wJPTQt3YLN7G_MN0axu4mSn120TWgMJnc_c5Rc8xVW5o4rrv403VCyJ8Hx-s-h-umY_ECjBfw
+
+#EXTM3U
+
+#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio0",NAME="default",AUTOSELECT=YES,DEFAULT=YES,CHANNELS="2",URI="index-f1-a1.m3u8"
+
+#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=2008324,RESOLUTION=1280x720,FRAME-RATE=30.000,CODECS="avc1.64001f,mp4a.40.2",VIDEO-RANGE=SDR,AUDIO="audio0"
+index-f2-v1.m3u8
+#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=948021,RESOLUTION=854x480,FRAME-RATE=30.000,CODECS="avc1.64001f,mp4a.40.2",VIDEO-RANGE=SDR,AUDIO="audio0"
+index-f3-v1.m3u8
+#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=333426,RESOLUTION=428x240,FRAME-RATE=30.000,CODECS="avc1.640015,mp4a.40.2",VIDEO-RANGE=SDR,AUDIO="audio0"
+index-f4-v1.m3u8
+
+curl.exe "https://bskrmsqauswest-uswe.azureedge.net/bc32473d-5a00-4455-b406-08dc8bc22537/s1433683.ism/Manifest(format=m3u8-cmaf)?2AgceIW5oIK_9bua5wJPTQt3YLN7G_MN0axu4mSn120TWgMJnc_c5Rc8xVW5o4rrv403VCyJ8Hx-s-h-umY_ECjBfw"
+curl.exe "https://bskrmsqauswest-uswe.azureedge.net/bc32473d-5a00-4455-b406-08dc8bc22537/s1433683.ism/index-f1-a1.m3u8?2AgceIW5oIK_9bua5wJPTQt3YLN7G_MN0axu4mSn120TWgMJnc_c5Rc8xVW5o4rrv403VCyJ8Hx-s-h-umY_ECjBfw"
+curl.exe "https://bskrmsqauswest-uswe.azureedge.net/bc32473d-5a00-4455-b406-08dc8bc22537/s1433683.ism/seg-1-f1-a1.ts?2AgceIW5oIK_9bua5wJPTQt3YLN7G_MN0axu4mSn120TWgMJnc_c5Rc8xVW5o4rrv403VCyJ8Hx-s-h-umY_ECjBfw"
+

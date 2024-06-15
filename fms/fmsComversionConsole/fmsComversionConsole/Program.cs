@@ -28,14 +28,14 @@ namespace fmsComversionConsole
                       (AudioConversionHlsCommandLine options) =>
                       {
                           var vc = new fms.VideoManager(options.AudioFileName);
-                          var c = vc.ConvertAudioToHls(options.HlsFolder, options.FFMPEG_EXE, options.FMS_AZURE_STORAGE_CONNECTION_STRING, options.CDN_HOST, options.fmsVideoId, options.DeriveFmsVideoId);
+                          var c = vc.ConvertAudioToHls(options.HlsFolder, options.FFMPEG_EXE, options.FMS_AZURE_STORAGE_CONNECTION_STRING, options.CDN_HOST, options.fmsVideoId, options.DeriveFmsVideoId, options.CopyToAzure);
                           return 0;
                       },
                       (VideoConversionHlsCommandLine options) =>
                       {
                           var vc = new fms.VideoManager(options.VideoFileName);
                           
-                          var c = vc.ConvertVideoToHls(options.HlsFolder, options.FFMPEG_EXE, options.FMS_AZURE_STORAGE_CONNECTION_STRING, options.ResolutionList, options.CDN_HOST, options.fmsVideoId, options.DeriveFmsVideoId);
+                          var c = vc.ConvertVideoToHls(options.HlsFolder, options.FFMPEG_EXE, options.FMS_AZURE_STORAGE_CONNECTION_STRING, options.ResolutionList, options.CDN_HOST, options.fmsVideoId, options.DeriveFmsVideoId, options.CopyToAzure);
                           return 0;
                       },
                       (DownloadHlsAssetsCommandLine options) =>

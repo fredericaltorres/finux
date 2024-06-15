@@ -1,0 +1,18 @@
+Digital Video Introduction:
+    digital_video_introduction (https://github.com/leandromoreira/digital_video_introduction)
+    encoding_pratical_examples (https://github.com/leandromoreira/digital_video_introduction/blob/master/encoding_pratical_examples.md)
+    hands-on-check-video-properties (https://github.com/leandromoreira/digital_video_introduction/blob/master/README.md#hands-on-check-video-properties)
+
+HLS:
+    What is HLS (HTTP Live Streaming) and How Does It Work? (https://ottverse.com/hls-http-live-streaming-how-does-it-work/)
+    
+Shaka:
+    Error Codes (https://shaka-player-demo.appspot.com/docs/api/shaka.util.Error.html)
+    media supported (https://shaka-player-demo.appspot.com/support.html)
+
+URLS:
+    Urls (https://ottverse.com/free-hls-m3u8-test-urls)
+    Video Encoding (https://ottverse.com/video-encoding/)
+        What is Video Transcoding and Why is it Critical to Video Streaming (https://ottverse.com/what-is-video-transcoding/)
+        What’s a Video Codec? Comprehensive Guide with Examples (https://ottverse.com/what-is-a-video-codec/)
+    
