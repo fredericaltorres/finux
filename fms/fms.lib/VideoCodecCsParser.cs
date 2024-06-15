@@ -58,7 +58,8 @@ Designed for streaming video over the network, with high compression capability 
 
 Main Profile (MP) 
 The profile used for standard-definition digital television being broadcast in MPEG-4 format. Not used for high-definition television broadcasts. This profile's importance has faded since the introduction of the High Profile—which was added for HDTV use—in 2004.	
-4D	00
+4D	
+00
 
 High Profile (HiP) 
 Currently, HiP is the primary profile used for broadcast and disc-based HD video; it's used both for HD TV broadcasts and for Blu-Ray video.	
@@ -160,7 +161,8 @@ Based on the High Profile, to which the main substream must adhere.The remaining
 
             public override string ToString()
             {
-                return $"{Name} - {CodeHexa:x} - {Constraint:x}";
+                var s = $"{Name} - ( {CodeHexa:x:00} {Constraint:xx} )";
+                return s;
             }
         }
 
@@ -252,7 +254,7 @@ Based on the High Profile, to which the main substream must adhere.The remaining
                     var codecType = codecParts[0];
                     var codecName = codecParts[1];
 
-                    if (avcProfiles.Is(codecType))
+                    if (Is(AdvancedVideoCodingCodec, codecType))
                     {
                         var profileCode = int.Parse(codecName.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
                         var profileLevel = int.Parse(codecName.Substring(4, 2), System.Globalization.NumberStyles.HexNumber) / 10f;
@@ -260,9 +262,8 @@ Based on the High Profile, to which the main substream must adhere.The remaining
                         var avcRefProfile = avcProfiles.Get(profileCode, profileConstraint);
                         if (avcRefProfile != null)
                         {
-
                             sb.Append($"Avc: {avcRefProfile}, ");
-                            sb.Append($"profileLevel: v {profileLevel}");
+                            sb.Append($"Level: v {profileLevel}. ");
                         }
                         else sb.Append($"Avc: {codecType}, with constraint {profileConstraint} not found");
                     }
@@ -271,12 +272,11 @@ Based on the High Profile, to which the main substream must adhere.The remaining
                     {
                         sb.Append($"Audio: {Get(AudioCodec, codecType)}, ");
                         sb.Append($"{codecParts[1]}, ");
-                        sb.Append($"{codecParts[2]}, ");
+                        sb.Append($"{codecParts[2]}. ");
                     }
                 }
             }
             return sb.ToString();
         }
-      
     }
 }
