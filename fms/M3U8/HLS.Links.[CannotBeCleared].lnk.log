@@ -15,4 +15,8 @@ URLS:
     Video Encoding (https://ottverse.com/video-encoding/)
         What is Video Transcoding and Why is it Critical to Video Streaming (https://ottverse.com/what-is-video-transcoding/)
         What’s a Video Codec? Comprehensive Guide with Examples (https://ottverse.com/what-is-a-video-codec/)
-    
+RFC Codec:
+    (https://www.rfc-editor.org/rfc/rfc6381#section-3.3)
+     The 'Codecs' and 'Profiles' Parameters for "Bucket" Media Types (https://datatracker.ietf.org/doc/html/rfc6381)
+     Advanced Video Coding (https://en.wikipedia.org/wiki/Advanced_Video_Coding#Profiles)
+     
