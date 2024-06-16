@@ -1,4 +1,10 @@
+# fred video
+  https://fvideostreamcdn-dfg7fudzbbcmgkgz.z01.azurefd.net/i-want-you-video/master.m3u8
+  https://fvideostream.blob.core.windows.net/i-want-you-video/master.m3u8
+  https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8
+  
 
+https://cookpete.github.io/react-player/
 # bitmoving
 
 var source = {

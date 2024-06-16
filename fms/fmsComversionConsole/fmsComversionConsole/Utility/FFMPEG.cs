@@ -23,10 +23,10 @@ namespace fmsComversionConsole.Utility
             r.FFMPEGCommandLine = sb.ToString();
             var exitCode = 0;
             var rr = ExecuteProgramUtilty.ExecProgram(ffmepexe, sb.ToString(), ref exitCode);
-            r.Success = rr && exitCode == 0;
+            r.Succeeded = rr && exitCode == 0;
             r.Done();
 
-            if (r.Success)
+            if (r.Succeeded)
             {
             }
             else
@@ -47,9 +47,9 @@ namespace fmsComversionConsole.Utility
             r.FFMPEGCommandLine = sb.ToString();
             var exitCode = 0;
             var rr = ExecuteProgramUtilty.ExecProgram(ffmepexe, sb.ToString(), ref exitCode);
-            r.Success = rr && exitCode == 0;
+            r.Succeeded = rr && exitCode == 0;
             r.Done();
-            if (r.Success)
+            if (r.Succeeded)
             {
             }
             else
@@ -70,10 +70,10 @@ namespace fmsComversionConsole.Utility
             r.FFMPEGCommandLine = sb.ToString();
             var exitCode = 0;
             var rr = ExecuteProgramUtilty.ExecProgram(ffmepexe, sb.ToString(), ref exitCode);
-            r.Success = rr && exitCode == 0;
+            r.Succeeded = rr && exitCode == 0;
             r.Done();
 
-            if (r.Success)
+            if (r.Succeeded)
             {
             }
             else

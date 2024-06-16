@@ -108,16 +108,16 @@ namespace fms
 
             var exitCode = 0;
             var r = ExecuteProgramUtilty.ExecProgram(ffmepexe, sb.ToString(), ref exitCode);
-            c.Success = r && exitCode == 0;
+            c.Succeeded = r && exitCode == 0;
 
             var tsFileSize = 0L;
-            if (c.Success)
+            if (c.Succeeded)
             {
                 // Finalize the HLS conversion
                 FixPathInM3U8(parentFolder, audioFolder, fmsVideoId, GetConversionComment(fmsVideoId));
                 if (copyToAzure)
                 {
-                    (c.mu38MasterUrl, c.ThumbnailUrl, c.TsFileSize) = UploadToAzureStorage(this._inputVideoFileNameOrUrl, null, parentFolder, fmsVideoId, azureStorageConnectionString, cdnHost);
+                    (c.mu38MasterUrl, c.ThumbnailUrl, c.TsFileSize, c.mu38MasterLocalFile) = UploadToAzureStorage(this._inputVideoFileNameOrUrl, null, parentFolder, fmsVideoId, azureStorageConnectionString, cdnHost);
                 }
             }
             else
@@ -179,7 +179,7 @@ namespace fms
                 }
             }
 
-            Logger.Trace($"[RESOLUTIONS]{string.Join(", ", resolutions.Select(rso => rso.Name))}", this);
+            Logger.Trace($"[RESOLUTIONS]{string.Join(", ", resolutions.Select(rso => rso.ToString()))}", this);
             Logger.Trace($"[SKIPPED.RESOLUTIONS]{string.Join(", ", skippedResolutions.Select(rso => rso.Name))}", this);
 
             if(resolutions.Count == 0)
@@ -237,34 +237,33 @@ namespace fms
 
             var exitCode = 0;
             var r = ExecuteProgramUtilty.ExecProgram(ffmepexe, sb.ToString(), ref exitCode);
-            c.Success = r && exitCode == 0;
+            c.Succeeded = r && exitCode == 0;
+            c.FFMPEGExitCode = exitCode;
 
-            var tsFileSize = 0L;
-            if (c.Success)
+            if (c.Succeeded)
             {
                 // Finalize the HLS conversion
                 FixPathInM3U8(parentFolder, videoFolder, fmsVideoId, GetConversionComment(fmsVideoId));
                 var thumbnailLocalFile = GetVideoThumbnail(this._inputVideoFileNameOrUrl);
                 if (copyToAzure)
                 {
-                    (c.mu38MasterUrl, c.ThumbnailUrl, c.TsFileSize) = UploadToAzureStorage(this._inputVideoFileNameOrUrl, thumbnailLocalFile, parentFolder, fmsVideoId, azureStorageConnectionString, cdnHost);
+                    (c.mu38MasterUrl, c.ThumbnailUrl, c.TsFileSize, c.mu38MasterLocalFile) = UploadToAzureStorage(this._inputVideoFileNameOrUrl, thumbnailLocalFile, parentFolder, fmsVideoId, azureStorageConnectionString, cdnHost);
                 }
                 else Logger.Trace($"[CONVERSION] No upload to Azure", this);
+
+                Logger.Trace($"[SUMMARY] {c.ToJson()}", this);
+                Logger.Trace($@"[JAVASCRIPT] const cdn_url = ""{c.mu38MasterUrl}""; // {Path.GetFileName(c.InputFile)}", this);
+                Logger.Trace($@"mu38MasterUrl: ({c.mu38MasterUrl})", this);
+                Logger.Trace($@"Download master.m3u8: (curl.exe|--output ""c:\temp\master.m3u8"" ""{c.mu38MasterUrl}"" )", this);
+                Logger.Trace($@"Ravnur Player master.m3u8: ({RavnurPlayerUrl}?url={c.mu38MasterUrlEncoded})", this);
+                Logger.Trace($@"Bitmovin Player master.m3u8: ({BitmovinPlayerUrl}?format=hls&manifest={c.mu38MasterUrlEncoded} )", this);
+                Logger.Trace($@"ThumbnailUrl: ({c.ThumbnailUrl})", this);
             }
             else 
             {
                 DirectoryFileService.DeleteDirectory(parentFolder);
+                Logger.Trace($"[SUMMARY][ERROR] ffmpeg.exitCode:{exitCode} {c.ToJson()}", this);
             }
-            
-            Logger.Trace($"[SUMMARY] {c.ToJson()}", this);
-            Logger.Trace($@"[JAVASCRIPT] const cdn_url = ""{c.mu38MasterUrl}""; // {Path.GetFileName(c.InputFile)}", this);
-            Logger.Trace($@"mu38MasterUrl: ({c.mu38MasterUrl})", this);
-
-            Logger.Trace($@"Download master.m3u8: (curl.exe|--output ""c:\temp\master.m3u8"" ""{c.mu38MasterUrl}"" )", this);
-            Logger.Trace($@"Ravnur Player master.m3u8: ({RavnurPlayerUrl}?url={c.mu38MasterUrlEncoded})", this);
-            Logger.Trace($@"Bitmovin Player master.m3u8: ({BitmovinPlayerUrl}?format=hls&manifest={c.mu38MasterUrlEncoded} )", this);
-
-            Logger.Trace($@"ThumbnailUrl: ({c.ThumbnailUrl})", this);
 
             return c;
         }
@@ -288,11 +287,12 @@ namespace fms
             return fileName;
         }
 
-        private (string, string, long) UploadToAzureStorage(string orginalVideo, string thumbnailLocalFile, string parentFolder, string fmsVideoId, string azureStorageConnectionString, string cdnHost)
+        private (string, string, long, string) UploadToAzureStorage(string orginalVideo, string thumbnailLocalFile, string parentFolder, string fmsVideoId, string azureStorageConnectionString, string cdnHost)
         {
             var masterM3U8Exists = File.Exists(Path.Combine(parentFolder, masterM3u8Filemame));
             var audioPlayListM3U8Exists = File.Exists(Path.Combine(parentFolder, AudioPlayListM3u8Filemame));
-            
+            var masterLocalFile = string.Empty;
+
             var thumbnailBlobName = "thumbnail.jpg";
             var thumbnailBlobNameExists = File.Exists(thumbnailLocalFile);
             Logger.Trace($"Uploading to Azure fmsVideoId:{fmsVideoId}", this);
@@ -325,6 +325,10 @@ namespace fms
             foreach (var f in files)
             {
                 var blobName = Path.GetFileName(f);
+                if(masterM3u8Filemame == blobName )
+                {
+                    masterLocalFile = masterM3u8Filemame;
+                }
                 bm.UploadBlobStreamAsync(containerName, blobName, File.OpenRead(TraceUploading(f)), DirectoryFileService.GetContentType(f)).GetAwaiter().GetResult();
             }
 
@@ -337,6 +341,7 @@ namespace fms
 
             var tsFilesSize = 0L;
             var masterUrlFromCDN = string.Empty;
+            
             if (masterM3U8Exists)
             {
                 var masterUrlDirectFromStorage = bm.GetBlobURL(containerName, masterM3u8Filemame).ToString(); // get the URL for the master.m3u8
@@ -368,7 +373,7 @@ namespace fms
                 }
             }
 
-            return (masterUrlFromCDN, thumbnailUrlFromCDN, tsFilesSize);
+            return (masterUrlFromCDN, thumbnailUrlFromCDN, tsFilesSize, masterLocalFile);
         }
 
         public GifToMp4ConversionResult ConvertGifToMp4(string mp4FileName, int bitRateKb, string ffmepexe)
@@ -388,28 +393,28 @@ namespace fms
                 r.FFMPEGCommandLine = sb.ToString();
                 var exitCode = 0;
                 var rr = ExecuteProgramUtilty.ExecProgram(ffmepexe, sb.ToString(), ref exitCode);
-                r.Success = rr && exitCode == 0;
+                r.Succeeded = rr && exitCode == 0;
                 r.Mp4FileName = mp4FileName;
                 r.Done();
 
-                if (r.Success)
+                if (r.Succeeded)
                 {
                     var r2 = FFMPEG.AddBlankAudioTrack(mp4FileName, ffmepexe, tfh);
-                    if (r2.Success)
+                    if (r2.Succeeded)
                     {
                         var r3 = FFMPEG.ChangeBitrate(r2.Mp4FileName, bitRateKb, ffmepexe, tfh);
-                        if(r3.Success)
+                        if(r3.Succeeded)
                         {
                             File.Copy(r3.Mp4FileName, mp4FileName, true);
                         }
                         else
                         {
-                            r.Success = false;
+                            r.Succeeded = false;
                         }
                     }
                     else
                     {
-                        r.Success = false;
+                        r.Succeeded = false;
                     }
                 }
                 else

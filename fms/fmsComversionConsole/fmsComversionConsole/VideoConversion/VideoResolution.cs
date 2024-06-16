@@ -19,7 +19,7 @@ namespace fms
 
         public override string ToString()
         {
-            return $"{Name} {Width}x{Height}, IsSquareResolution:{IsSquareResolution}";
+            return $"{Name} {Width}x{Height}, IsSquareResolution:{IsSquareResolution}, BitRate: {this.BitRate}";
         }
 
         public bool CanVideoBeConvertedToResolution(int videoWidth, int videoHeight)

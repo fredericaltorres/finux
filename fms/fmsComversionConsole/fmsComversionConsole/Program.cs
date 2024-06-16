@@ -35,9 +35,8 @@ namespace fmsComversionConsole
                       (VideoConversionHlsCommandLine options) =>
                       {
                           var vc = new fms.VideoManager(options.VideoFileName);
-                          
                           var c = vc.ConvertVideoToHls(options.HlsFolder, options.FFMPEG_EXE, options.FMS_AZURE_STORAGE_CONNECTION_STRING, options.ResolutionList, options.CDN_HOST, options.fmsVideoId, options.DeriveFmsVideoId, options.CopyToAzure);
-                          return 0;
+                          return c.Succeeded ? 0 : 1;
                       },
                       (DownloadHlsAssetsCommandLine options) =>
                       {
@@ -50,7 +49,7 @@ namespace fmsComversionConsole
                           //var data = hlsM.GetMasterInfo();
                           //Logger.Trace($"{data}", new { }, replaceCRLF: false);
                           //Trace(data);
-                          return 0;
+                          return downloadInfo.Succeeded ? 0 : 1;
                       },
                       (VideoInfoCommandLine options) =>
                       {
@@ -62,8 +61,8 @@ namespace fmsComversionConsole
                       {
                           var vc = new fms.VideoManager(options.GifFileName);
                           Logger.Trace(vc.GetVideoInfo());
-                          vc.ConvertGifToMp4(options.Mp4FileName, options.BitRateKb, options.FFMPEG_EXE);
-                          return 0;
+                          var rr = vc.ConvertGifToMp4(options.Mp4FileName, options.BitRateKb, options.FFMPEG_EXE);
+                          return rr.Succeeded ? 0 : 1;
                       },
 
                       errs => 123

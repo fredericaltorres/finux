@@ -7,8 +7,9 @@ namespace fms
     public class ConversionResultBase
     {
         public string InputFile { get; set; }
-        public bool Success { get; set; }
+        public bool Succeeded { get; set; }
         public string FFMPEGCommandLine { get; set; }
+        public int FFMPEGExitCode { get; set; }
         protected Stopwatch _stopwatch { get; set; }
 
         public int Duration => (int)(_stopwatch.ElapsedMilliseconds / 1000);
@@ -68,6 +69,7 @@ namespace fms
         public string LocalFolder { get; set; }
         public List<VideoResolution> Resolutions { get; set; }
         public string mu38MasterUrl { get; set;}
+        public string mu38MasterLocalFile { get; set; }
         public string ThumbnailUrl { get; set; }
         public long TsFileSize { get; set; }
 
