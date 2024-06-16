@@ -271,7 +271,7 @@ Based on the High Profile, to which the main substream must adhere.The remaining
                         if(profileWithConstraintFound)
                             sb.Append($", ConstraintFound: {profileWithConstraintFound}");
 
-                        sb.Append(".")
+                        sb.Append(".");
                     }
                     else if (Is(AudioCodec, codecType))
                     {

@@ -20,6 +20,7 @@ namespace fmsComversionConsole
             try
             {
                 Logger.TraceToConsole = true;
+                Logger.Trace(Environment.CommandLine);
                 var cmdParser = new Parser(config => config.HelpWriter = null);
                 var parsingTry = cmdParser.ParseArguments<AudioConversionHlsCommandLine, VideoConversionHlsCommandLine, DownloadHlsAssetsCommandLine, VideoInfoCommandLine, ConversionGifToMp4CommandLine> (args);
 

@@ -71,6 +71,8 @@ namespace fms
         public string ThumbnailUrl { get; set; }
         public long TsFileSize { get; set; }
 
+        public string mu38MasterUrlEncoded => System.Web.HttpUtility.UrlEncode(mu38MasterUrl);
+
         public long TsFileSizeMb => TsFileSize / 1024 / 1024;
 
 

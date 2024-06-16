@@ -2,9 +2,7 @@ https://github.com/leandromoreira/digital_video_introduction/blob/master/encodin
 https://github.com/leandromoreira/digital_video_introduction/blob/master/README.md#hands-on-check-video-properties
 https://github.com/leandromoreira/digital_video_introduction/blob/master/README.md#hands-on-check-video-properties
 
-
 # and-your-bird-can-sing-video-1
-
 #EXTM3U
 #EXT-X-VERSION:6
 #EXT-X-STREAM-INF:BANDWIDTH=1240800,RESOLUTION=1920x1080,CODECS="avc1.640028,mp4a.40.2"

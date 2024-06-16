@@ -17,9 +17,21 @@ namespace fms
         public int SegmentDurationSeconds { get; set; } = 6;
         public bool IsSquareResolution => Width == Height;
 
+        public override string ToString()
+        {
+            return $"{Name} {Width}x{Height}, IsSquareResolution:{IsSquareResolution}";
+        }
+
         public bool CanVideoBeConvertedToResolution(int videoWidth, int videoHeight)
         {
-            return videoWidth >= Width && videoHeight >= Height;
+            if(videoWidth >= Width && videoHeight >= Height)
+            {
+                if(this.IsSquareResolution)
+                    return videoWidth == videoHeight;
+
+                return true;
+            }
+            return false;
         }
 
         // https://ottverse.com/cbr-crf-changing-resolution-using-ffmpeg/   

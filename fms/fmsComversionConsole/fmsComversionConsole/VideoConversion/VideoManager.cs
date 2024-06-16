@@ -21,6 +21,7 @@ namespace fms
 {
     public partial class VideoManager
     {
+        const string FMS_VERSION = "FMS 1.0";
 
         const string masterM3u8Filemame = "master.m3u8";
         const string AudioPlayListM3u8Filemame = "audioplaylist.m3u8";
@@ -62,12 +63,13 @@ namespace fms
             return sb.ToString();
         }
 
-        public void FixPathInM3U8(string videoFolder, string search, string replacement)
+        public void FixPathInM3U8(string videoFolder, string search, string replacement, string commentToInsert)
         {
             var files = Directory.GetFiles(videoFolder, "*.m3u8");
             foreach(var f in files)
             {
                 var text = File.ReadAllText(f);
+                text = text.Replace("#EXTM3U\n", $"#EXTM3U\n\n## {commentToInsert}\n\n");
                 text = text.Replace(search, replacement);
                 File.WriteAllText(f, text);
             }
@@ -112,7 +114,7 @@ namespace fms
             if (c.Success)
             {
                 // Finalize the HLS conversion
-                FixPathInM3U8(parentFolder, audioFolder, fmsVideoId);
+                FixPathInM3U8(parentFolder, audioFolder, fmsVideoId, GetConversionComment(fmsVideoId));
                 if (copyToAzure)
                 {
                     (c.mu38MasterUrl, c.ThumbnailUrl, c.TsFileSize) = UploadToAzureStorage(this._inputVideoFileNameOrUrl, null, parentFolder, fmsVideoId, azureStorageConnectionString, cdnHost);
@@ -128,6 +130,11 @@ namespace fms
             Logger.Trace($@"mu38MasterUrl: ({c.mu38MasterUrl})", this);
 
             return c;
+        }
+
+        private string GetConversionComment(string fmsVideoId)
+        {
+            return $"{FMS_VERSION}, machine:{Environment.MachineName}, user: {Environment.UserName}, CommandLine: {Environment.CommandLine}";
         }
 
         public const int CONVERSION_MAX_RESOLUTIONS = 3;
@@ -236,7 +243,7 @@ namespace fms
             if (c.Success)
             {
                 // Finalize the HLS conversion
-                FixPathInM3U8(parentFolder, videoFolder, fmsVideoId);
+                FixPathInM3U8(parentFolder, videoFolder, fmsVideoId, GetConversionComment(fmsVideoId));
                 var thumbnailLocalFile = GetVideoThumbnail(this._inputVideoFileNameOrUrl);
                 if (copyToAzure)
                 {
@@ -252,10 +259,19 @@ namespace fms
             Logger.Trace($"[SUMMARY] {c.ToJson()}", this);
             Logger.Trace($@"[JAVASCRIPT] const cdn_url = ""{c.mu38MasterUrl}""; // {Path.GetFileName(c.InputFile)}", this);
             Logger.Trace($@"mu38MasterUrl: ({c.mu38MasterUrl})", this);
+
+            Logger.Trace($@"Download master.m3u8: (curl.exe|--output ""c:\temp\master.m3u8"" ""{c.mu38MasterUrl}"" )", this);
+            Logger.Trace($@"Ravnur Player master.m3u8: ({RavnurPlayerUrl}?url={c.mu38MasterUrlEncoded})", this);
+            Logger.Trace($@"Bitmovin Player master.m3u8: ({BitmovinPlayerUrl}?format=hls&manifest={c.mu38MasterUrlEncoded} )", this);
+
             Logger.Trace($@"ThumbnailUrl: ({c.ThumbnailUrl})", this);
 
             return c;
         }
+
+        const string BitmovinPlayerUrl = "https://bitmovin.com/demos/stream-test";
+
+        const string RavnurPlayerUrl = "https://strmsdemo.z13.web.core.windows.net";
 
         public string GetVideoThumbnail(string videoFileName)
         {
@@ -290,8 +306,9 @@ namespace fms
             var orginalVideoBlobName = Path.GetFileName(orginalVideo);
             if (DirectoryFileService.IsUrl(orginalVideo))
             {
-                var localorginalVideo = DirectoryFileService.DownloadFile(orginalVideo);
-                bm.UploadBlobStreamAsync(containerName, orginalVideoBlobName, File.OpenRead(TraceUploading(localorginalVideo)), DirectoryFileService.GetContentType(localorginalVideo)).GetAwaiter().GetResult();
+                var localOrginalVideo = DirectoryFileService.DownloadFile(orginalVideo);
+                bm.UploadBlobStreamAsync(containerName, orginalVideoBlobName, File.OpenRead(TraceUploading(localOrginalVideo)), DirectoryFileService.GetContentType(localOrginalVideo)).GetAwaiter().GetResult();
+                DirectoryFileService.DeleteFile(localOrginalVideo);
             }
             else
             {
