@@ -161,7 +161,7 @@ Based on the High Profile, to which the main substream must adhere.The remaining
 
             public override string ToString()
             {
-                var s = $"{Name} - ( {CodeHexa:x:00} {Constraint:xx} )";
+                var s = $"{Name} - ( {CodeHexa:x} {Constraint:x} )";
                 return s;
             }
         }
@@ -184,7 +184,7 @@ Based on the High Profile, to which the main substream must adhere.The remaining
 
             public AvcProfile Get(int code, int constraint)
             {
-                var r = this.FirstOrDefault(p => p.Code == code && p.Constraint == constraint);
+                var r = this.FirstOrDefault(p => p.Code == code && (p.Constraint == constraint || constraint == -1));
                 return r;
             }
 
@@ -259,16 +259,18 @@ Based on the High Profile, to which the main substream must adhere.The remaining
                         var profileCode = int.Parse(codecName.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
                         var profileLevel = int.Parse(codecName.Substring(4, 2), System.Globalization.NumberStyles.HexNumber) / 10f;
                         var profileConstraint = int.Parse(codecName.Substring(2, 2), System.Globalization.NumberStyles.HexNumber);
+
+                        var avcRefProfileNoConstraint = avcProfiles.Get(profileCode, -1);
+
                         var avcRefProfile = avcProfiles.Get(profileCode, profileConstraint);
                         if (avcRefProfile != null)
                         {
                             sb.Append($"Avc: {avcRefProfile}, ");
                             sb.Append($"Level: v {profileLevel}. ");
                         }
-                        else sb.Append($"Avc: {codecType}, with constraint {profileConstraint} not found");
+                        else sb.Append($"Avc: {codecType}, with profileCode:{profileCode:x}, ProfileName: {avcRefProfileNoConstraint.Name}, profileLevel:{profileLevel}, profileConstraint {profileConstraint:x} not found");
                     }
-
-                    if (Is(AudioCodec, codecType))
+                    else if (Is(AudioCodec, codecType))
                     {
                         sb.Append($"Audio: {Get(AudioCodec, codecType)}, ");
                         sb.Append($"{codecParts[1]}, ");
