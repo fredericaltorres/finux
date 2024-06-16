@@ -26,6 +26,7 @@ namespace fms.lib
         {
             ["avc1"] = "H.264",
             ["avc2"] = "H.264",
+            ["avc3"] = "H.264",
             ["svc1"] = "Scalable Video Coding 1",
             ["mvc1"] = "Multiview Video Coding 1",
             ["mvc2"] = "Multiview Video Coding 2",
@@ -259,16 +260,18 @@ Based on the High Profile, to which the main substream must adhere.The remaining
                         var profileCode = int.Parse(codecName.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
                         var profileLevel = int.Parse(codecName.Substring(4, 2), System.Globalization.NumberStyles.HexNumber) / 10f;
                         var profileConstraint = int.Parse(codecName.Substring(2, 2), System.Globalization.NumberStyles.HexNumber);
-
-                        var avcRefProfileNoConstraint = avcProfiles.Get(profileCode, -1);
-
                         var avcRefProfile = avcProfiles.Get(profileCode, profileConstraint);
-                        if (avcRefProfile != null)
-                        {
-                            sb.Append($"Avc: {avcRefProfile}, ");
-                            sb.Append($"Level: v {profileLevel}. ");
-                        }
-                        else sb.Append($"Avc: {codecType}, with profileCode:{profileCode:x}, ProfileName: {avcRefProfileNoConstraint.Name}, profileLevel:{profileLevel}, profileConstraint {profileConstraint:x} not found");
+                        var profileWithConstraintFound = avcRefProfile != null;
+
+                        if(!profileWithConstraintFound)
+                            avcRefProfile = avcProfiles.Get(profileCode, 00);
+
+                        sb.Append($"Avc: {avcRefProfile}, ");
+                        sb.Append($"Level: v {profileLevel}");
+                        if(profileWithConstraintFound)
+                            sb.Append($", ConstraintFound: {profileWithConstraintFound}");
+
+                        sb.Append(".")
                     }
                     else if (Is(AudioCodec, codecType))
                     {

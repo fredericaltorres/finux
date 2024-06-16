@@ -7,9 +7,19 @@ namespace fms.lib.tests
         {
             var vcp = new VideoCodecCsParser();
             var input = "";
+            var result = "";
+
+            input = "avc1.42c00d,mp4a.40.2"; // bitmovin video codec
+            result = vcp.Parse(input);
+
+            input = "avc1.4D401F";
+            result = vcp.Parse(input);
+
+            input = "avc3.42E01E";
+            result = vcp.Parse(input);
 
             input = "avc1.64001f,mp4a.40.2";
-            var result = vcp.Parse(input);
+            result = vcp.Parse(input);
 
             input = "avc1.4d401f,mp4a.40.2";
             result = vcp.Parse(input);
