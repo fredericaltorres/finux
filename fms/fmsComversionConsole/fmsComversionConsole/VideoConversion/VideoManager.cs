@@ -259,7 +259,7 @@ namespace fms
                 Logger.Trace($@"Bitmovin Player master.m3u8: ({BitmovinPlayerUrl}?format=hls&manifest={c.mu38MasterUrlEncoded} )", this);
                 Logger.Trace($@"ThumbnailUrl: ({c.ThumbnailUrl})", this);
                 Logger.Trace($@"mu38MasterLocalFile: ({c.mu38MasterLocalFile})", this);
-                Logger.Trace(File.ReadAllText(c.mu38MasterLocalFile), this);
+                Logger.Trace(File.ReadAllText(c.mu38MasterLocalFile), this, replaceCRLF: false);
             }
             else
             {
