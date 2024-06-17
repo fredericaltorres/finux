@@ -329,7 +329,7 @@ namespace fms
                 var blobName = Path.GetFileName(f);
                 if(masterM3u8Filemame == blobName )
                 {
-                    masterLocalFile = masterM3u8Filemame;
+                    masterLocalFile = f;
                 }
                 bm.UploadBlobStreamAsync(containerName, blobName, File.OpenRead(TraceUploading(f)), DirectoryFileService.GetContentType(f)).GetAwaiter().GetResult();
             }
