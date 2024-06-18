@@ -36,12 +36,15 @@ namespace fms
         public static string GetContentType(string fileName)
         {
             var ext = Path.GetExtension(fileName).ToLower();
-            switch (ext)
-            {
-                case ".m3u8": return "application/vnd.apple.mpegurl";//"application/x-mpegURL";
-                case ".ts": return "video/MP2T";
-                default: return "application/octet-stream";
-            }
+            MimeTypes.MimeTypeMap.TryGetMimeType(ext, out var mimeType);
+            return mimeType;
+
+            //switch (ext)
+            //{
+            //    case ".m3u8": return "application/vnd.apple.mpegurl";//"application/x-mpegURL";
+            //    case ".ts": return "video/MP2T";
+            //    default: return "application/octet-stream";
+            //}
         }
 
         public static string ReplaceHostInUri(string originalUrl, string newHost)

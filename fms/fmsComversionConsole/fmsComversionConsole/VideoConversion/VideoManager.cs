@@ -331,7 +331,7 @@ namespace fms
 
             if (thumbnailBlobNameExists) // Upload the thumbnail
             {
-                bm.UploadBlobStreamAsync(containerName, thumbnailBlobName, File.OpenRead(TraceUploading(thumbnailLocalFile)), DirectoryFileService.GetContentType(orginalVideo)).GetAwaiter().GetResult();
+                bm.UploadBlobStreamAsync(containerName, thumbnailBlobName, File.OpenRead(TraceUploading(thumbnailLocalFile)), DirectoryFileService.GetContentType(thumbnailLocalFile)).GetAwaiter().GetResult();
             }
 
             // Upload the m3u8 files

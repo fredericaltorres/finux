@@ -127,6 +127,7 @@
     <Compile Include="Utility\FFMPEG.cs" />
     <Compile Include="Utility\Logger.cs" />
     <Compile Include="Utility\DirectoryFileService.cs" />
+    <Compile Include="Utility\MimeTypeMap.cs" />
     <Compile Include="VideoConversion\DownloadedVideoResult.cs" />
     <Compile Include="VideoConversion\HlsConversionResult.cs" />
     <Compile Include="VideoConversion\HlsManager.cs" />
