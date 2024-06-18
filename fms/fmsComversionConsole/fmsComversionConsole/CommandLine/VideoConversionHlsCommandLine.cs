@@ -33,7 +33,14 @@ namespace fmsComversionConsole
      convertToHls --doNotCopyToAzure --deriveFmsVideoId --resolutions "1080p,1080x1080p,720p,720x720p"  --videoFileName "https://fredcloud.blob.core.windows.net/public/sirosVariri.05.Video.FULL.mp4"
 
      convertToHls --deriveFmsVideoId --resolutions "1080p,1080x1080p,720p,720x720p"  --videoFileName "https://fredcloud.blob.core.windows.net/public/IN-BETWEEN-DAYS.2020.11.26.mp4"
-    
+
+
+     HIGH RESOLUTION
+     convertToHls --deriveFmsVideoId --resolutions "FHD-4K-2160p,UHD-4K-2160p,2K-1440p,1080p"  --videoFileName "C:\Brainshark\Fred.DTA.VDO\2K\4K__4133023-uhd_3840_2160_30fps.mp4"
+     convertToHls --maxResolution 3 --deriveFmsVideoId --resolutions "FHD-4K-2160p,UHD-4K-2160p,2K-1440p,1080p" --videoFileName "C:\Brainshark\Fred.DTA.VDO\2K\4762563-FHD_4096_2160_24fps.mp4"
+
+    convertToHls --maxResolution 3 --deriveFmsVideoId --resolutions "FHD-4K-2160p,UHD-4K-2160p,2K-1440p,1080p" --videoFileName "C:\Brainshark\Fred.DTA.VDO\2K\4K__7493928-uhd_3840_2160_25fps.mp4"
+    convertToHls --maxResolution 3 --deriveFmsVideoId --resolutions "FHD-4K-2160p,UHD-4K-2160p,2K-1440p,1080p" --videoFileName "C:\Brainshark\Fred.DTA.VDO\2K\4k__7710585-FHD_4096_2160_25fps.mp4"
 
     //
     */
@@ -54,6 +61,9 @@ namespace fmsComversionConsole
         public bool DeriveFmsVideoId { get; set; } = false;
 
         public List<string> ResolutionList { get { return this.Resolutions.Split(DS.List(",").ToArray(), StringSplitOptions.RemoveEmptyEntries).ToList();  } }
+
+        [CommandLine.Option('m', "maxResolution", Required = false, HelpText = "maxResolution")]
+        public int MaxResolution { get; set; } = 3;
     }
 
     // fmsComversionConsole.exe convertAudioToHls  --deriveFmsVideoId --audioFileName "https://fredcloud.blob.core.windows.net/zic/Phil.2022.Instrumental.wav"

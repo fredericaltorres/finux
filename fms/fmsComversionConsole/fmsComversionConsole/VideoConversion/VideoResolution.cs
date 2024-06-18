@@ -56,13 +56,21 @@ namespace fms
             return $@"-map a:0 -c:a:{resolutionIndex} aac -b:a:{resolutionIndex} {AudioBitRateAacKb}k -ac 2 ";
         }
 
-        public string GetFFMPEGStreamMap(int resolutionIndex)
+        public string GetFFMPEGStreamMap(int resolutionIndex, bool hasAudioStream)
         {
-            return $@"v:{resolutionIndex},a:{resolutionIndex} ";
+            if (hasAudioStream)
+                return $@"v:{resolutionIndex},a:{resolutionIndex} ";
+            else 
+                return $@"v:{resolutionIndex} ";
         }
 
         public static Dictionary<string, VideoResolution> VideoResolutions = new Dictionary<string, VideoResolution>()
         {
+            ["FHD-4K-2160p"] = new VideoResolution() { Width = 4096, Height = 2160, Name = "FHD-4K-2160p", BitRate = "44M", Preset = "medium", KeyFrame = 48 },
+            ["UHD-4K-2160p"] = new VideoResolution() { Width = 3840, Height = 2160, Name = "UHD-4K-2160p", BitRate = "40M", Preset = "medium", KeyFrame = 48 },
+
+            ["2K-1440p"] = new VideoResolution() { Width = 3840, Height = 1440, Name = "2K-1440p", BitRate = "16M", Preset = "medium", KeyFrame = 48 },
+
             // todo: support kb rate for small resolution.
             ["1080p"]       = new VideoResolution() { Width = 1920, Height = 1080, Name = "1080p",      BitRate = "5M", Preset = "medium", KeyFrame = 48 },
             ["1080x1080p"]  = new VideoResolution() { Width = 1080, Height = 1080, Name = "1080x1080p", BitRate = "5M", Preset = "medium", KeyFrame = 48 },

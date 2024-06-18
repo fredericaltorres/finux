@@ -140,10 +140,19 @@ namespace fms
         public const int CONVERSION_MAX_RESOLUTIONS = 3;
 
         // https://www.youtube.com/watch?v=xJQBnrJXyv4 Download HLS Streaming Video with PowerShell and FFMPEG
-        public HlsConversionResult ConvertVideoToHls(string hlsFolder, string ffmepexe, string azureStorageConnectionString, List<string> resolutionKeys, string cdnHost, string fmsVideoId, bool deriveFmsVideoId, bool copyToAzure )
+        public HlsConversionResult ConvertVideoToHls(
+            string hlsFolder, string ffmepexe, string azureStorageConnectionString, 
+            List<string> resolutionKeys, 
+            string cdnHost, 
+            string fmsVideoId, 
+            bool deriveFmsVideoId, 
+            bool copyToAzure, int maxResolution )
         {
             Logger.Trace($"");
             Logger.Trace($"[CONVERSION][VIDEO] Start - {this.GetVideoInfo()}");
+
+            maxResolution = Math.Min(maxResolution, CONVERSION_MAX_RESOLUTIONS);
+            var hasAudioStream = this.GetAudioStream != null;
 
             // fmdVideoId initialization, different mode possible
             if (string.IsNullOrEmpty(fmsVideoId))
@@ -172,7 +181,7 @@ namespace fms
                     if (videoResolution.CanVideoBeConvertedToResolution(this.Width, this.Height))
                     {
                         resolutions.Add(videoResolution);
-                        if(resolutions.Count == CONVERSION_MAX_RESOLUTIONS) // for now we only support 3 resolutions in the ffmpeg command line, could be extended
+                        if(resolutions.Count == maxResolution) // for now we only support 3 resolutions in the ffmpeg command line, could be extended
                             break;
                     }
                     else skippedResolutions.Add(videoResolution);
@@ -213,8 +222,11 @@ namespace fms
             for (var re = 0; re < resolutions.Count; re++)
                 sb.Append(resolutions[re].GetVideoMapCmd(re+1));
 
-            for (var re = 0; re < resolutions.Count; re++)
-                sb.Append(resolutions[re].GetAudioMapCmd(re + 1)); // todo increase quality of audio
+            if (hasAudioStream)
+            {
+                for (var re = 0; re < resolutions.Count; re++)
+                    sb.Append(resolutions[re].GetAudioMapCmd(re + 1)); // todo increase quality of audio
+            }
             //sb.Append($@"-map a:0 -c:a:0 aac -b:a:0 128k -ac 2 ");
             //sb.Append($@"-map a:0 -c:a:1 aac -b:a:1 128k -ac 2 ");
 
@@ -229,7 +241,7 @@ namespace fms
 
             sb.Append($@"-var_stream_map """); //sb.Append($@"-var_stream_map ""v:0,a:0 v:1,a:1"" ");
             for (var re = 0; re < resolutions.Count; re++)
-                sb.Append(resolutions[re].GetFFMPEGStreamMap(re));
+                sb.Append(resolutions[re].GetFFMPEGStreamMap(re, hasAudioStream));
             sb.Remove(sb.Length - 1, 1);
             sb.Append($@""" ");
             sb.Append($@" ""{videoFolder}-%v.m3u8"" ");

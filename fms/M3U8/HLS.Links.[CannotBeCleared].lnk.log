@@ -20,3 +20,17 @@ RFC Codec:
      The 'Codecs' and 'Profiles' Parameters for "Bucket" Media Types (https://datatracker.ietf.org/doc/html/rfc6381)
      Advanced Video Coding (https://en.wikipedia.org/wiki/Advanced_Video_Coding#Profiles)
      
+Resolution:
+
+    - HD: 1280 x 720 pixels;
+    - Full HD: 1920 x 1080 pixels;
+    - 2K: 2048 x 1080 pixels;
+    - 4K or Ultra HD: 3840 x 2160 pixels;
+    - 8K: 7680 x 4320 pixels;
+    - 10K: 10240 x 4320 pixels.
+
+https://dsplay.tv/site/en/suporte/qual-a-diferenca-entre-resolucoes-hd-full-hd-ultra-hd-2k-4k-8k-10k/#:~:text=2K%3A%202048%20x%201080%20pixels,10K%3A%2010240%20x%204320%20pixels.
+
+
+High Resolution Video Sample:
+    2k Footage (https://www.pexels.com/search/videos/2k%20footage/     )

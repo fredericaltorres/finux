@@ -2,9 +2,15 @@
   https://fvideostreamcdn-dfg7fudzbbcmgkgz.z01.azurefd.net/i-want-you-video/master.m3u8
   https://fvideostream.blob.core.windows.net/i-want-you-video/master.m3u8
   https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8
-  
 
-https://cookpete.github.io/react-player/
+https://fvideostreamcdn-dfg7fudzbbcmgkgz.z01.azurefd.net/i-want-you-video/master.m3u8
+https://fvideostream.blob.core.windows.net/i-want-you-video/master.m3u8
+
+Access-Control-Allow-Origin: *
+https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/Errors/CORSMissingAllowOrigin
+https://stackoverflow.com/questions/66207552/how-to-forward-access-control-allow-origin-header-from-a-web-app-to-a-front-door
+
+https://cookpete.github.io/react-player
 # bitmoving
 
 var source = {
