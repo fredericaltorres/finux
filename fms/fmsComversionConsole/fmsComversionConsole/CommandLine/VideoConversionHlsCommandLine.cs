@@ -21,7 +21,7 @@ namespace fmsComversionConsole
      fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,1080x1080p,720p,720x720p"  --videoFileName "C:\VIDEO\ChatGPT4.QuestionFacts\ChatGPT4.QuestionFacts\MASTER\ChatGPT4.QuestionFacts\ChatGPT4.QuestionFacts.mp4"
      fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,1080x1080p,720p,720x720p"  --videoFileName "C:\VIDEO\EmbeddingVectorDBSimilaritySearch.JavaScript\EmbeddingVectorDBSimilaritySearch.JavaScript\MASTER\EmbeddingVectorDBSimilaritySearch.JavaScript\EmbeddingVectorDBSimilaritySearch.JavaScript.mp4"
      fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,1080x1080p,720p,720x720p"  --videoFileName "C:\VIDEO\EmbeddingVectorDBSimilaritySearch\EmbeddingVectorDBSimilaritySearch\MASTER\EmbeddingVectorDBSimilaritySearch\EmbeddingVectorDBSimilaritySearch.mp4"
-     fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,1080x1080p,720p,720x720p"  --videoFileName "https://fredcloud.blob.core.windows.net/public/sirosVariri.05.Video.FULL.mp4"
+     
 
 
      fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,1080x1080p,720p,720x720p"  --videoFileName "C:\VIDEO\And Your Bird Can Sing.Video\And Your Bird Can Sing.Video\MASTER\And Your Bird Can Sing.Video\And Your Bird Can Sing.Video.mp4"
@@ -35,12 +35,22 @@ namespace fmsComversionConsole
      convertToHls --deriveFmsVideoId --resolutions "1080p,1080x1080p,720p,720x720p"  --videoFileName "https://fredcloud.blob.core.windows.net/public/IN-BETWEEN-DAYS.2020.11.26.mp4"
 
 
+
+     fmsComversionConsole.exe convertToHls  --deriveFmsVideoId --resolutions "1080p,720p"  --videoFileName "C:\VIDEO\sirosVariri.05.NOT-INSTAGRAM.Video\MASTER\sirosVariri.05.NOT-INSTAGRAM.Video\sirosVariri.05.NOT-INSTAGRAM.Video.mp4"
+
      HIGH RESOLUTION
      convertToHls --deriveFmsVideoId --resolutions "FHD-4K-2160p,UHD-4K-2160p,2K-1440p,1080p"  --videoFileName "C:\Brainshark\Fred.DTA.VDO\2K\4K__4133023-uhd_3840_2160_30fps.mp4"
      convertToHls --maxResolution 3 --deriveFmsVideoId --resolutions "FHD-4K-2160p,UHD-4K-2160p,2K-1440p,1080p" --videoFileName "C:\Brainshark\Fred.DTA.VDO\2K\4762563-FHD_4096_2160_24fps.mp4"
 
     convertToHls --maxResolution 3 --deriveFmsVideoId --resolutions "FHD-4K-2160p,UHD-4K-2160p,2K-1440p,1080p" --videoFileName "C:\Brainshark\Fred.DTA.VDO\2K\4K__7493928-uhd_3840_2160_25fps.mp4"
     convertToHls --maxResolution 3 --deriveFmsVideoId --resolutions "FHD-4K-2160p,UHD-4K-2160p,2K-1440p,1080p" --videoFileName "C:\Brainshark\Fred.DTA.VDO\2K\4k__7710585-FHD_4096_2160_25fps.mp4"
+
+    convertToHls --maxResolution 3 --deriveFmsVideoId --resolutions "FHD-4K-2160p,UHD-4K-2160p,2K-1440p,1080p" --videoFileName "C:\Brainshark\Fred.DTA.VDO\2K\4k__11956586_3840_2160_60fps.mp4"
+
+    # real 2k
+    convertToHls --deriveFmsVideoId --resolutions "FHD-4K-2160p,UHD-4K-2160p,2K-1440p,1080p" --videoFileName "C:\Brainshark\Fred.DTA.VDO\2K\2K_20659481-uhd_2560x1440_24fps.mp4"
+
+    
 
     //
     */

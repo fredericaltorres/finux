@@ -29,7 +29,8 @@ namespace fms
 
         private MediaInfo _mediaInfo { get; set; }
         private string _inputVideoFileNameOrUrl { get; }
-        
+
+        public float FrameRate => GetVideoStream.FrameRate;
         public int Width => GetVideoStream.Width;
         public int Height => GetVideoStream.Height;
         public bool IsSquareResolution => Width == Height;
@@ -220,7 +221,7 @@ namespace fms
             //sb.Append($@"-map ""[v2out]"" -c:v:1 libx264 -x264-params ""nal-hrd=cbr:force-cfr=1"" -b:v:1 3M -maxrate:v:1 3M -minrate:v:1 3M -bufsize:v:1 3M -preset ""{preset}"" -g 48 -sc_threshold 0 -keyint_min 48 ");
 
             for (var re = 0; re < resolutions.Count; re++)
-                sb.Append(resolutions[re].GetVideoMapCmd(re+1));
+                sb.Append(resolutions[re].GetVideoMapCmd(re+1, this.FrameRate));
 
             if (hasAudioStream)
             {

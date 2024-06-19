@@ -12,6 +12,21 @@ namespace fms
         public int Height { get; set; }
         public string Name { get; set; }
         public string BitRate { get; set; } // 5M or 5000K
+
+        public bool BitRateInMB => BitRate.EndsWith("M");
+        public bool BitRateInKB => BitRate.EndsWith("K");
+        public int BitRateAsInt => int.Parse(BitRate.Replace("K", "").Replace("M", ""));
+        public string MultiplyBitRateBy(int factor)
+        {
+            var v = BitRateAsInt * factor;
+            if(BitRateInMB)
+                return $"{v}M";
+            else
+                return $"{v}K";
+        }
+
+        public int FrameRateForDoubleBitRate => 25*2; // At 50 fps the bit rate is double.
+
         public int KeyFrame { get; set; } = 48;
         public string Preset { get; set; } = "medium";
         public int SegmentDurationSeconds { get; set; } = 6;
@@ -35,13 +50,18 @@ namespace fms
         }
 
         // https://ottverse.com/cbr-crf-changing-resolution-using-ffmpeg/   
-        public string GetVideoMapCmd(int resolutionIndex)
+        public string GetVideoMapCmd(int resolutionIndex, float frameRate)
         {
+            var bitRate = this.BitRate;
+            if(frameRate > this.FrameRateForDoubleBitRate)
+                bitRate = this.MultiplyBitRateBy(2);
+
             return $@"-map ""[v{resolutionIndex}out]"" 
 -c:v:0 libx264 
 -x264-params ""nal-hrd=cbr:force-cfr=1"" 
--b:v:0 {BitRate} -maxrate:v:0 {BitRate} -minrate:v:0 {BitRate} 
+-b:v:0 {bitRate} -maxrate:v:0 {bitRate} -minrate:v:0 {bitRate} 
 -bufsize:v:0 {BitRate} -preset ""{Preset}"" -g {KeyFrame} -sc_threshold 0 -keyint_min {KeyFrame} ".Replace(Environment.NewLine, "");
+
         }
 
         public string GetScaleResolutionCmd(int resolutionIndex, bool isLast)
@@ -69,7 +89,7 @@ namespace fms
             ["FHD-4K-2160p"] = new VideoResolution() { Width = 4096, Height = 2160, Name = "FHD-4K-2160p", BitRate = "44M", Preset = "medium", KeyFrame = 48 },
             ["UHD-4K-2160p"] = new VideoResolution() { Width = 3840, Height = 2160, Name = "UHD-4K-2160p", BitRate = "40M", Preset = "medium", KeyFrame = 48 },
 
-            ["2K-1440p"] = new VideoResolution() { Width = 3840, Height = 1440, Name = "2K-1440p", BitRate = "16M", Preset = "medium", KeyFrame = 48 },
+            ["2K-1440p"] = new VideoResolution() { Width = 2560, Height = 1440, Name = "2K-1440p", BitRate = "16M", Preset = "medium", KeyFrame = 48 },
 
             // todo: support kb rate for small resolution.
             ["1080p"]       = new VideoResolution() { Width = 1920, Height = 1080, Name = "1080p",      BitRate = "5M", Preset = "medium", KeyFrame = 48 },

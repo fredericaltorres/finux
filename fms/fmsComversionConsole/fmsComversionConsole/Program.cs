@@ -35,6 +35,7 @@ namespace fmsComversionConsole
                       (VideoConversionHlsCommandLine options) =>
                       {
                           var vc = new fms.VideoManager(options.VideoFileName);
+                          Logger.Trace(vc.GetVideoInfo());
                           var c = vc.ConvertVideoToHls(options.HlsFolder, options.FFMPEG_EXE, options.FMS_AZURE_STORAGE_CONNECTION_STRING, options.ResolutionList, options.CDN_HOST, options.fmsVideoId, options.DeriveFmsVideoId, options.CopyToAzure, options.MaxResolution);
                           return c.Succeeded ? 0 : 1;
                       },
