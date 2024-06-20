@@ -12,6 +12,9 @@ namespace fms
         public int Height { get; set; }
         public string Name { get; set; }
         public string BitRate { get; set; } // 5M or 5000K
+        public int KeyFrame { get; set; } = 48;
+        public string Preset { get; set; } = "medium";
+        public int SegmentDurationSeconds { get; set; } = 6;
 
         public bool BitRateInMB => BitRate.EndsWith("M");
         public bool BitRateInKB => BitRate.EndsWith("K");
@@ -26,15 +29,40 @@ namespace fms
         }
 
         public int FrameRateForDoubleBitRate => 25*2; // At 50 fps the bit rate is double.
-
-        public int KeyFrame { get; set; } = 48;
-        public string Preset { get; set; } = "medium";
-        public int SegmentDurationSeconds { get; set; } = 6;
         public bool IsSquareResolution => Width == Height;
+        public bool IsPortraitResolution => Width < Height;
+
+
+        public VideoResolution Clone(string newName, bool asPortrait = false)
+        {
+            var r = new VideoResolution()
+            {
+                Width = this.Width,
+                Height = this.Height,
+                Name = newName,
+                BitRate = this.BitRate,
+                KeyFrame = this.KeyFrame,
+                Preset = this.Preset,
+                SegmentDurationSeconds = this.SegmentDurationSeconds
+            };
+            if (asPortrait)
+            {
+                var w = r.Width;
+                r.Width = this.Height;
+                r.Height = w;
+            }
+                
+            return r;
+        }
 
         public override string ToString()
         {
-            return $"{Name} {Width}x{Height}, IsSquareResolution:{IsSquareResolution}, BitRate: {this.BitRate}";
+            return $"{Name} {Width}x{Height}, IsSquare: {IsSquareResolution},  IsPortrait: {IsPortraitResolution}, BitRate: {this.BitRate}";
+        }
+
+        public bool IsWidthHeightPortraitResolution(int videoWidth, int videoHeight)
+        {
+            return videoWidth < videoHeight;
         }
 
         public bool CanVideoBeConvertedToResolution(int videoWidth, int videoHeight)
@@ -43,6 +71,17 @@ namespace fms
             {
                 if(this.IsSquareResolution)
                     return videoWidth == videoHeight;
+
+                
+                if (this.IsPortraitResolution && this.IsWidthHeightPortraitResolution(videoWidth, videoHeight))
+                    return true;
+
+                if (this.IsPortraitResolution && !this.IsWidthHeightPortraitResolution(videoWidth, videoHeight))
+                    return false;
+
+                if (!this.IsPortraitResolution && this.IsWidthHeightPortraitResolution(videoWidth, videoHeight))
+                    return false;
+
 
                 return true;
             }
@@ -84,9 +123,30 @@ namespace fms
                 return $@"v:{resolutionIndex} ";
         }
 
-        public static Dictionary<string, VideoResolution> VideoResolutions = new Dictionary<string, VideoResolution>()
+        static Dictionary<string, VideoResolution> _videoResolutions = null;
+
+        public static Dictionary<string, VideoResolution> VideoResolutions
+        {
+            get
+            {
+                if (_videoResolutions == null)
+                {
+                    _videoResolutions = new Dictionary<string, VideoResolution>();
+                    foreach (var kv in _videoResolutionDefinitions)
+                    {
+                        _videoResolutions[kv.Key] = kv.Value;
+                        var newKey = $"{kv.Key}-Portrait";
+                        _videoResolutions[newKey] = kv.Value.Clone(newKey, asPortrait: true);
+                    }
+                }
+                return _videoResolutions;
+            }
+        }
+
+        public static Dictionary<string, VideoResolution> _videoResolutionDefinitions = new Dictionary<string, VideoResolution>()
         {
             ["FHD-4K-2160p"] = new VideoResolution() { Width = 4096, Height = 2160, Name = "FHD-4K-2160p", BitRate = "44M", Preset = "medium", KeyFrame = 48 },
+
             ["UHD-4K-2160p"] = new VideoResolution() { Width = 3840, Height = 2160, Name = "UHD-4K-2160p", BitRate = "40M", Preset = "medium", KeyFrame = 48 },
 
             ["2K-1440p"] = new VideoResolution() { Width = 2560, Height = 1440, Name = "2K-1440p", BitRate = "16M", Preset = "medium", KeyFrame = 48 },
@@ -97,18 +157,11 @@ namespace fms
 
             ["1024x1024p"]  = new VideoResolution() { Width = 1024, Height = 1024, Name = "1080x1080p", BitRate = "5M", Preset = "medium", KeyFrame = 48 },
 
-            ["960x540"]     = new VideoResolution() { Width = 960,  Height = 540,  Name = "960x540",    BitRate = "3M", Preset = "medium", KeyFrame = 48 },
-
             ["720p"]        = new VideoResolution() { Width = 1280, Height = 720,  Name = "720p",       BitRate = "2M", Preset = "medium", KeyFrame = 48 },
             ["720x720p"]    = new VideoResolution() { Width = 720,  Height = 720,  Name = "720x720p",   BitRate = "2M", Preset = "medium", KeyFrame = 48 },
 
-            ["630x360p"]    = new VideoResolution() { Width = 630, Height = 360,   Name = "630x360p",   BitRate = "1M", Preset = "medium", KeyFrame = 48 },
-
             ["480p"]        = new VideoResolution() { Width = 640,  Height = 480,  Name = "480p",       BitRate = "1M", Preset = "medium", KeyFrame = 48 },
             ["480x480p"]    = new VideoResolution() { Width = 480,  Height = 480,  Name = "480x480p",   BitRate = "1M", Preset = "medium", KeyFrame = 48 },
-
-            ["320x240p"]    = new VideoResolution() { Width = 320,  Height = 240,  Name = "320x240p",   BitRate = "500K", Preset = "medium", KeyFrame = 48 },
-            ["240x240p"]    = new VideoResolution() { Width = 240,  Height = 240,  Name = "240x240p",   BitRate = "500K", Preset = "medium", KeyFrame = 48 },
         };
 
         public static List<string> VideoResolutionAvailable = VideoResolutions.Keys.ToList();

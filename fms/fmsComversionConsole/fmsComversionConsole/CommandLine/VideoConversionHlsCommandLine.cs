@@ -50,7 +50,7 @@ namespace fmsComversionConsole
     # real 2k
     convertToHls --deriveFmsVideoId --resolutions "FHD-4K-2160p,UHD-4K-2160p,2K-1440p,1080p" --videoFileName "C:\Brainshark\Fred.DTA.VDO\2K\2K_20659481-uhd_2560x1440_24fps.mp4"
 
-    
+    convertToHls --deriveFmsVideoId --resolutions "all" --videoFileName "C:\VIDEO\Fred.AI.Video\Woman Thru Life from 16 to 105.mp4"
 
     //
     */
@@ -70,7 +70,9 @@ namespace fmsComversionConsole
         [CommandLine.Option('f', "deriveFmsVideoId", Required = false, HelpText = "deriveFmsVideoId")]
         public bool DeriveFmsVideoId { get; set; } = false;
 
-        public List<string> ResolutionList { get { return this.Resolutions.Split(DS.List(",").ToArray(), StringSplitOptions.RemoveEmptyEntries).ToList();  } }
+        public List<string> ResolutionList { get { 
+                return this.Resolutions.Split(DS.List(",").ToArray(), StringSplitOptions.RemoveEmptyEntries).ToList();  
+            } }
 
         [CommandLine.Option('m', "maxResolution", Required = false, HelpText = "maxResolution")]
         public int MaxResolution { get; set; } = 3;

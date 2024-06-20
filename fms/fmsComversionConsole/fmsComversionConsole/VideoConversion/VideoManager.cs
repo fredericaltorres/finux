@@ -34,6 +34,7 @@ namespace fms
         public int Width => GetVideoStream.Width;
         public int Height => GetVideoStream.Height;
         public bool IsSquareResolution => Width == Height;
+        public bool IsPortraitResolution => Height > Width;
 
         public StreamInfo GetVideoStream => _mediaInfo.Streams.Where(s => s.CodecType == "video").FirstOrDefault();
         public StreamInfo GetAudioStream => _mediaInfo.Streams.Where(s => s.CodecType == "audio").FirstOrDefault();
@@ -172,6 +173,11 @@ namespace fms
 
             Logger.Trace($"[CONVERSION] {DS.Dictionary(new { c.InputFile, c.fmsVideoId, videoFolder }).Format()}", this);
             DirectoryFileService.CreateDirectory(parentFolder, deleteIfExists: true);
+
+            if(resolutionKeys.Count == 1 && resolutionKeys[0].ToLowerInvariant() == "all")
+            {
+                resolutionKeys = VideoResolution.VideoResolutions.Select(re => re.Key).ToList();
+            }
 
             // Analyse which resolution can be applied to video
             foreach(var rk in resolutionKeys)
