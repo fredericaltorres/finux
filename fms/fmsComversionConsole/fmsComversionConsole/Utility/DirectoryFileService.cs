@@ -22,8 +22,8 @@ namespace fms
             }
 
             var rr = sb.ToString();
-            rr = rr.Replace("--", "-");
             rr = rr.Substring(0, Math.Min(MAX_CONTAINER_NAME_LENGTH, rr.Length));
+            rr = rr.Replace("--", "-");
 
             return rr;
         }

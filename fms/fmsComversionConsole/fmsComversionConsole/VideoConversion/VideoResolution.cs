@@ -149,6 +149,9 @@ namespace fms
 
             ["UHD-4K-2160p"] = new VideoResolution() { Width = 3840, Height = 2160, Name = "UHD-4K-2160p", BitRate = "40M", Preset = "medium", KeyFrame = 48 },
 
+            ["2Kish-1664x2432p"] = new VideoResolution() { Width = 2432, Height = 1664, Name = "2Kish-1664x2432p", BitRate = "16M", Preset = "medium", KeyFrame = 48 },
+
+
             ["2K-1440p"] = new VideoResolution() { Width = 2560, Height = 1440, Name = "2K-1440p", BitRate = "16M", Preset = "medium", KeyFrame = 48 },
 
             // todo: support kb rate for small resolution.

@@ -20,4 +20,17 @@ namespace fmsComversionConsole
         [CommandLine.Option('v', "videoFileName", Required = false, HelpText = "VideoFileName")]
         public string VideoFileName { get; set; }
     }
+
+    /*
+        fmsComversionConsole.exe addAudio --videoFileName "C:\temp\@fAiImages\mystical creature\mystical creature.cgdream.1664x2432.2Kish.mp4" --audioFileName "C:\temp\@fAiImages\mystical creature\audio.wav"
+     */
+    [Verb("addAudio", HelpText = "addAudio")]
+    public class AddAudioCommandLine : BaseCommandLine
+    {
+        [CommandLine.Option('v', "videoFileName", Required = false, HelpText = "VideoFileName")]
+        public string VideoFileName { get; set; }
+
+        [CommandLine.Option('a', "audioFileName", Required = false, HelpText = "audioFileName")]
+        public string AudioFileName { get; set; }
+    }
 }

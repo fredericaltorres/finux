@@ -77,6 +77,66 @@ namespace fms
             }
         }
 
+        public AudioFileConversionResult ConvertAudioFileToAAC(string ffmepexe, string audioFileName)
+        {
+            var tfh = new TestFileHelper();
+            Logger.Trace($"");
+            Logger.Trace($"[CONVERSION][AUDIO-TO-AAC] Start - {this.GetVideoInfo()}");
+
+            var c = new AudioFileConversionResult { InputAudioFileName = audioFileName, OutputAudioFileName = tfh.GetTempFileName("aac") };
+            var sb = new StringBuilder();
+            sb.Append($@"-i ""{audioFileName}"" -codec:a aac ""{c.OutputAudioFileName}"" ");
+            c.FFMPEGCommandLine = sb.ToString();
+
+            var exitCode = 0;
+            var r = ExecuteProgramUtilty.ExecProgram(ffmepexe, sb.ToString(), ref exitCode);
+            c.Succeeded = r && exitCode == 0;
+            Logger.Trace($"[ADD-AUDIO][SUMMARY]");
+            Logger.Trace($"InputAudioFileName: ({c.InputAudioFileName}), Size:{(new FileInfo(c.InputAudioFileName).Length / 1024f / 1024f)} MB");
+
+            if (c.Succeeded)
+            {
+                Logger.Trace($"OutputAudioFileName: ({c.OutputAudioFileName}), Size:{(new FileInfo(c.OutputAudioFileName).Length / 1024f / 1024f)} MB");
+            }
+            else
+            {
+                Logger.TraceError($"[CONVERSION][ADD-AUDIO] Error - {c.ToJson()}");
+            }
+            return c;
+        }
+
+        public AddAudioResult AddAudioToVideo(string ffmepexe, string audioFileName)
+        {
+            var audioConversion = ConvertAudioFileToAAC(ffmepexe, audioFileName);   
+            var tfh = new TestFileHelper();
+            var c = new AddAudioResult { VideoInputFileName = this._inputVideoFileNameOrUrl, AudioFileName = audioConversion.OutputAudioFileName };
+            Logger.Trace($"");
+            Logger.Trace($"[CONVERSION][ADD-AUDIO] Start - {this.GetVideoInfo()}");
+            c.VideoOuputPutFileName = tfh.GetTempFileName("mp4");
+            var sb = new StringBuilder();
+            sb.Append($@"-i ""{_inputVideoFileNameOrUrl}"" -i ""{audioConversion.OutputAudioFileName}"" -c copy -map 0:v:0 -map 1:a:0 ""{c.VideoOuputPutFileName}""");
+            c.FFMPEGCommandLine = sb.ToString();
+
+            var exitCode = 0;
+            var r = ExecuteProgramUtilty.ExecProgram(ffmepexe, sb.ToString(), ref exitCode);
+            c.Succeeded = r && exitCode == 0;
+            Logger.Trace($@"[ADD-AUDIO][SUMMARY]");
+            Logger.Trace($@"VideoInputFileName: ({c.VideoInputFileName}), Size:{(new FileInfo(c.VideoInputFileName).Length / 1024f / 1024f)} MB");
+            Logger.Trace($@"AudioFileName: ({c.AudioFileName}), Size:{(new FileInfo(c.AudioFileName).Length / 1024f / 1024f)} MB");
+            Logger.Trace($@"Ms-Dos Copy Command:{Environment.NewLine}   copy ""{c.VideoOuputPutFileName}""  ""{c.VideoInputFileName}"" ", replaceCRLF: false);
+            if (c.Succeeded)
+            {
+                Logger.Trace($"VideoOuputPutFileName: ({c.VideoOuputPutFileName}), Size:{(new FileInfo(c.VideoOuputPutFileName).Length / 1024f / 1024f)} MB");
+
+            }
+            else
+            {
+                Logger.TraceError($"[CONVERSION][ADD-AUDIO] Error - {c.ToJson()}");
+            }
+            tfh.DeleteFile(audioConversion.OutputAudioFileName);
+            return c;
+        }
+
         public HlsConversionResult ConvertAudioToHls(string hlsFolder, string ffmepexe, string azureStorageConnectionString, string cdnHost, string fmsVideoId, bool deriveFmsVideoId, bool copyToAzure)
         {
             Logger.Trace($"");

@@ -51,6 +51,9 @@ namespace fmsComversionConsole
     convertToHls --deriveFmsVideoId --resolutions "FHD-4K-2160p,UHD-4K-2160p,2K-1440p,1080p" --videoFileName "C:\Brainshark\Fred.DTA.VDO\2K\2K_20659481-uhd_2560x1440_24fps.mp4"
 
     convertToHls --deriveFmsVideoId --resolutions "all" --videoFileName "C:\VIDEO\Fred.AI.Video\Woman Thru Life from 16 to 105.mp4"
+    convertToHls --deriveFmsVideoId --resolutions "all" --videoFileName "C:\VIDEO\Fred.AI.Video\Delicately shimmering celestial artifact.mp4"
+    convertToHls --deriveFmsVideoId --resolutions "all" --videoFileName "C:\VIDEO\Fred.AI.Video\When the world is running down. The Police.mp4"
+    convertToHls --deriveFmsVideoId --resolutions "all" --videoFileName "C:\temp\@fAiImages\mystical creature\mystical creature.cgdream.1664x2432.2Kish.mp4"
 
     //
     */

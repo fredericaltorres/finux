@@ -82,4 +82,25 @@ namespace fms
         {
         }
     }
+
+    public class AddAudioResult : ConversionResultBase
+    {
+        public string VideoInputFileName { get; set; }
+        public string VideoOuputPutFileName { get; set; }
+        public string AudioFileName { get; set; }
+
+        public AddAudioResult() : base()
+        {
+        }
+    }
+
+    public class AudioFileConversionResult : ConversionResultBase
+    {
+        public string InputAudioFileName { get; set; }
+        public string OutputAudioFileName { get; set; }
+
+        public AudioFileConversionResult() : base()
+        {
+        }
+    }
 }
