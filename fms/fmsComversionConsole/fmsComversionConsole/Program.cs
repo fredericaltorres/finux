@@ -31,7 +31,7 @@ namespace fmsComversionConsole
                         var vc = new fms.VideoManager(options.VideoFileName);
                         var c = vc.AddAudioToVideo(options.FFMPEG_EXE, options.AudioFileName);
                         return 0;
-                    },
+                    },      
                       (AudioConversionHlsCommandLine options) =>
                       {
                           var vc = new fms.VideoManager(options.AudioFileName);
@@ -42,7 +42,7 @@ namespace fmsComversionConsole
                       {
                           var vc = new fms.VideoManager(options.VideoFileName);
                           Logger.Trace(vc.GetVideoInfo());
-                          var c = vc.ConvertVideoToHls(options.HlsFolder, options.FFMPEG_EXE, options.FMS_AZURE_STORAGE_CONNECTION_STRING, options.ResolutionList, options.CDN_HOST, options.fmsVideoId, options.DeriveFmsVideoId, options.CopyToAzure, options.MaxResolution);
+                          var c = vc.ConvertVideoToHls(options.HlsFolder, options.FFMPEG_EXE, options.FMS_AZURE_STORAGE_CONNECTION_STRING, options.ResolutionList, options.CDN_HOST, options.fmsVideoId, options.DeriveFmsVideoId, options.CopyToAzure, options.MaxResolution, options.Preset);
                           return c.Succeeded ? 0 : 1;
                       },
                       (DownloadHlsAssetsCommandLine options) =>

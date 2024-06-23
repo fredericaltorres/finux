@@ -13,7 +13,7 @@ namespace fms
         public string Name { get; set; }
         public string BitRate { get; set; } // 5M or 5000K
         public int KeyFrame { get; set; } = 48;
-        public string Preset { get; set; } = "medium";
+        public string Preset { get; set; } = "medium"; // https://trac.ffmpeg.org/wiki/Encode/H.264
         public int SegmentDurationSeconds { get; set; } = 6;
 
         public bool BitRateInMB => BitRate.EndsWith("M");
@@ -143,28 +143,31 @@ namespace fms
             }
         }
 
+        const string DEFAULT_PRESET = "slow";
+        const int DEFAULT_KEYFRAME = 48;
+
         public static Dictionary<string, VideoResolution> _videoResolutionDefinitions = new Dictionary<string, VideoResolution>()
         {
-            ["FHD-4K-2160p"] = new VideoResolution() { Width = 4096, Height = 2160, Name = "FHD-4K-2160p", BitRate = "44M", Preset = "medium", KeyFrame = 48 },
+            ["FHD-4K-2160p"] = new VideoResolution() { Width = 4096, Height = 2160, Name = "FHD-4K-2160p", BitRate = "44M", Preset = DEFAULT_PRESET, KeyFrame = DEFAULT_KEYFRAME },
 
-            ["UHD-4K-2160p"] = new VideoResolution() { Width = 3840, Height = 2160, Name = "UHD-4K-2160p", BitRate = "40M", Preset = "medium", KeyFrame = 48 },
+            ["UHD-4K-2160p"] = new VideoResolution() { Width = 3840, Height = 2160, Name = "UHD-4K-2160p", BitRate = "40M", Preset = DEFAULT_PRESET, KeyFrame = DEFAULT_KEYFRAME },
 
-            ["2Kish-1664x2432p"] = new VideoResolution() { Width = 2432, Height = 1664, Name = "2Kish-1664x2432p", BitRate = "16M", Preset = "medium", KeyFrame = 48 },
+            ["2Kish-1664x2432p"] = new VideoResolution() { Width = 2432, Height = 1664, Name = "2Kish-1664x2432p", BitRate = "16M", Preset = DEFAULT_PRESET, KeyFrame = DEFAULT_KEYFRAME },
 
 
-            ["2K-1440p"] = new VideoResolution() { Width = 2560, Height = 1440, Name = "2K-1440p", BitRate = "16M", Preset = "medium", KeyFrame = 48 },
+            ["2K-1440p"] = new VideoResolution() { Width = 2560, Height = 1440, Name = "2K-1440p", BitRate = "16M", Preset = DEFAULT_PRESET, KeyFrame = DEFAULT_KEYFRAME },
 
             // todo: support kb rate for small resolution.
-            ["1080p"]       = new VideoResolution() { Width = 1920, Height = 1080, Name = "1080p",      BitRate = "5M", Preset = "medium", KeyFrame = 48 },
-            ["1080x1080p"]  = new VideoResolution() { Width = 1080, Height = 1080, Name = "1080x1080p", BitRate = "5M", Preset = "medium", KeyFrame = 48 },
+            ["1080p"]       = new VideoResolution() { Width = 1920, Height = 1080, Name = "1080p",      BitRate = "5M", Preset = DEFAULT_PRESET, KeyFrame = DEFAULT_KEYFRAME },
+            ["1080x1080p"]  = new VideoResolution() { Width = 1080, Height = 1080, Name = "1080x1080p", BitRate = "5M", Preset = DEFAULT_PRESET, KeyFrame = DEFAULT_KEYFRAME },
 
-            ["1024x1024p"]  = new VideoResolution() { Width = 1024, Height = 1024, Name = "1080x1080p", BitRate = "5M", Preset = "medium", KeyFrame = 48 },
+            ["1024x1024p"]  = new VideoResolution() { Width = 1024, Height = 1024, Name = "1080x1080p", BitRate = "5M", Preset = DEFAULT_PRESET, KeyFrame = DEFAULT_KEYFRAME },
 
-            ["720p"]        = new VideoResolution() { Width = 1280, Height = 720,  Name = "720p",       BitRate = "2M", Preset = "medium", KeyFrame = 48 },
-            ["720x720p"]    = new VideoResolution() { Width = 720,  Height = 720,  Name = "720x720p",   BitRate = "2M", Preset = "medium", KeyFrame = 48 },
+            ["720p"]        = new VideoResolution() { Width = 1280, Height = 720,  Name = "720p",       BitRate = "2M", Preset = DEFAULT_PRESET, KeyFrame = DEFAULT_KEYFRAME },
+            ["720x720p"]    = new VideoResolution() { Width = 720,  Height = 720,  Name = "720x720p",   BitRate = "2M", Preset = DEFAULT_PRESET, KeyFrame = DEFAULT_KEYFRAME },
 
-            ["480p"]        = new VideoResolution() { Width = 640,  Height = 480,  Name = "480p",       BitRate = "1M", Preset = "medium", KeyFrame = 48 },
-            ["480x480p"]    = new VideoResolution() { Width = 480,  Height = 480,  Name = "480x480p",   BitRate = "1M", Preset = "medium", KeyFrame = 48 },
+            ["480p"]        = new VideoResolution() { Width = 640,  Height = 480,  Name = "480p",       BitRate = "1M", Preset = DEFAULT_PRESET, KeyFrame = DEFAULT_KEYFRAME },
+            ["480x480p"]    = new VideoResolution() { Width = 480,  Height = 480,  Name = "480x480p",   BitRate = "1M", Preset = DEFAULT_PRESET, KeyFrame = DEFAULT_KEYFRAME },
         };
 
         public static List<string> VideoResolutionAvailable = VideoResolutions.Keys.ToList();

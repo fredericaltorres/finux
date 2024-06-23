@@ -208,7 +208,8 @@ namespace fms
             string cdnHost, 
             string fmsVideoId, 
             bool deriveFmsVideoId, 
-            bool copyToAzure, int maxResolution )
+            bool copyToAzure, int maxResolution,
+            string preset)
         {
             Logger.Trace($"");
             Logger.Trace($"[CONVERSION][VIDEO] Start - {this.GetVideoInfo()}");
@@ -248,7 +249,9 @@ namespace fms
                     if (videoResolution.CanVideoBeConvertedToResolution(this.Width, this.Height))
                     {
                         resolutions.Add(videoResolution);
-                        if(resolutions.Count == maxResolution) // for now we only support 3 resolutions in the ffmpeg command line, could be extended
+                        if (videoResolution.Preset != preset)
+                            videoResolution.Preset = preset;
+                        if (resolutions.Count == maxResolution) // for now we only support 3 resolutions in the ffmpeg command line, could be extended
                             break;
                     }
                     else skippedResolutions.Add(videoResolution);

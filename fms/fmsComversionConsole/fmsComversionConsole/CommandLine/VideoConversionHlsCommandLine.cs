@@ -53,7 +53,7 @@ namespace fmsComversionConsole
     convertToHls --deriveFmsVideoId --resolutions "all" --videoFileName "C:\VIDEO\Fred.AI.Video\Woman Thru Life from 16 to 105.mp4"
     convertToHls --deriveFmsVideoId --resolutions "all" --videoFileName "C:\VIDEO\Fred.AI.Video\Delicately shimmering celestial artifact.mp4"
     convertToHls --deriveFmsVideoId --resolutions "all" --videoFileName "C:\VIDEO\Fred.AI.Video\When the world is running down. The Police.mp4"
-    convertToHls --deriveFmsVideoId --resolutions "all" --videoFileName "C:\temp\@fAiImages\mystical creature\mystical creature.cgdream.1664x2432.2Kish.mp4"
+    convertToHls --preset slower --deriveFmsVideoId --resolutions "all" --videoFileName "C:\DVT\fAI\Images\CGDream\mystical creature\mystical creature.cgdream.1664x2432.2Kish.mp4"
 
     //
     */
@@ -79,7 +79,11 @@ namespace fmsComversionConsole
 
         [CommandLine.Option('m', "maxResolution", Required = false, HelpText = "maxResolution")]
         public int MaxResolution { get; set; } = 3;
+
+        [CommandLine.Option('p', "preset", Required = false, HelpText = "preset")]
+        public string Preset { get; set; } = "medium";
     }
+
 
     // fmsComversionConsole.exe convertAudioToHls  --deriveFmsVideoId --audioFileName "https://fredcloud.blob.core.windows.net/zic/Phil.2022.Instrumental.wav"
     [Verb("convertAudioToHls", HelpText = "convertToHls")]
