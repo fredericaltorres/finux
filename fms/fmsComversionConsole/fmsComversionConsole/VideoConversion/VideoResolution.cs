@@ -57,7 +57,7 @@ namespace fms
 
         public override string ToString()
         {
-            return $"{Name} {Width}x{Height}, IsSquare: {IsSquareResolution},  IsPortrait: {IsPortraitResolution}, BitRate: {this.BitRate}";
+            return $"resolution(Name: {Name}, Dimension: {Width}x{Height}, IsSquare: {IsSquareResolution}, IsPortrait: {IsPortraitResolution}, BitRate: {this.BitRate}); ";
         }
 
         public bool IsWidthHeightPortraitResolution(int videoWidth, int videoHeight)
@@ -147,6 +147,7 @@ namespace fms
         const int DEFAULT_KEYFRAME = 48;
 
         // https://support.google.com/youtube/answer/2853702?hl=en
+        // choco install ffmpeg-full
 
         public static Dictionary<string, VideoResolution> _videoResolutionDefinitions = new Dictionary<string, VideoResolution>()
         {
